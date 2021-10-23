@@ -71,17 +71,7 @@ int main(int argc, char **argv) {
 
   
   
-  fixedPoint aux;
-  fixedPoint aux2;
-  fixedPoint aux3;
-  aux = fixedPoint(0, 24, 24, ALICE);
-  aux2 = fixedPoint(0, 24, 24, ALICE);
-  aux3 = aux.absolute_value();
-  for (int i = 0; i<48; i++)
-  {
-    //cout<< aux3.bits[i].reveal(ALICE)<< endl;
-  }
-  cout<< aux.reveal<double>(ALICE)<< endl;
+  
   
 
   subSystem *subsystem = new subSystem();

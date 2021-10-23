@@ -67,18 +67,6 @@ int main(int argc, char **argv) {
   setup_semi_honest(io, party);
   bool print = 1;
  
-  fixedPoint aux;
-  fixedPoint aux2;
-  fixedPoint aux3;
-  aux = fixedPoint(-5.309/100000000000, 24, 24, ALICE);
-  aux2 = fixedPoint(10, 24, 24, ALICE);
-  aux3 = aux.absolute_value();
-  for (int i = 0; i<48; i++)
-  {
-    //cout<< aux3.bits[i].reveal(ALICE)<< endl;
-  }
-  cout<< aux.reveal<double>(ALICE)<< endl;
-
   subSystem *subsystem = new subSystem();
   // Setup *setup = new Setup();
   Cloud *cloud = new Cloud();

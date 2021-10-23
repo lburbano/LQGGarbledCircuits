@@ -165,9 +165,7 @@ public:
     for (int i = 0; i < this->sizeA[0]; i++) {
       for (int j = 0; j < this->sizeA[1]; j++) {
         this->A_BK_ne[i][j] = this->A_ne[i][j] - BK_ne[i][j];
-        cout<< this->A_BK_ne[i][j] << endl;
       }
-      cout<< endl;
     }   
      
   }
