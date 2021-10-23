@@ -1,3 +1,4 @@
+// Implements the cloud side of the protocol
 #include "Cloud.h"
 #include "Actuator.h"
 #include "emp-tool/execution/circuit_execution.h"
@@ -75,17 +76,11 @@ int main(int argc, char **argv) {
   
 
   subSystem *subsystem = new subSystem();
-  // Setup *setup = new Setup();
   Cloud *cloud = new Cloud();
 
   // client offline
   subsystem->inputData();
-
-  // setup offline
-  // subsystem->inputData();
-
   subsystem->garbleConstants();
-
   subsystem->garbleReferenceConstants();
 
   // cloud offline
@@ -104,27 +99,13 @@ int main(int argc, char **argv) {
   
 
   int k = 0;
-
-  /*
-  cout << "z" << k << ":  " << endl;
-  for (int i = 0; i < subsystem->sizexk[0]; i++) {
-    for (int j = 0; j < subsystem->sizexk[1]; j++) {
-      cout << subsystem->xk[i][j].reveal<double>(BOB) << ", ";
-    }
-    cout << endl;
-  }
-  */
-
-  //cloud->computeuk();
-
-  //subsystem->measureState(cloud->uk);
-  //subsystem->computezk();
-  
+ 
   if (print) {
     print_init( cloud, subsystem, k);
   }
 
   cout << endl;
+  // Control loop
   for (k = 0; k < 2; k++) {
     if (k > 0){
       cloud->predict();

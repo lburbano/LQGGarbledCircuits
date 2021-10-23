@@ -1,3 +1,4 @@
+// Implements the system side of the protocol
 #include "Actuator.h"
 #include "Cloud.h"
 #include "emp-tool/execution/circuit_execution.h"
@@ -68,18 +69,16 @@ int main(int argc, char **argv) {
   bool print = 1;
  
   subSystem *subsystem = new subSystem();
-  // Setup *setup = new Setup();
   Cloud *cloud = new Cloud();
 
-  // client offline
-  // subsystem->inputData();
-
-  // setup offline
+  // Loads data related to controller and system
   subsystem->inputData();
 
+  // Computes controller matrices 
   subsystem->computeControlConstants();
   subsystem->garbleControlConstants();
 
+  // Computes reference related constants
   subsystem->computeReferenceConstants();
   subsystem->garbleReferenceConstants();
 
@@ -92,33 +91,15 @@ int main(int argc, char **argv) {
                    subsystem->A_BK, subsystem->sizeA_BK, subsystem->Bug, subsystem->sizeBug, //maybe changed
                    subsystem->xr, subsystem->sizexr, subsystem->ur,
                    subsystem->sizeur, subsystem->x0, subsystem->sizex0);
-
-  // cloud->computeConstants();
-
-  
+ 
 
   int k = 0;
-
-  /*
-  cout << "z" << k << ":  " << endl;
-  for (int i = 0; i < subsystem->sizexk[0]; i++) {
-    for (int j = 0; j < subsystem->sizexk[1]; j++) {
-      cout << subsystem->xk[i][j].reveal<double>(BOB) << ", ";
-    }
-    cout << endl;
-  }
-  */
-
-  //cloud->computeuk();
- 
-  //subsystem->measureState(cloud->uk);
-  //subsystem->computezk();
 
   if (print) {
     print_init(cloud, subsystem, k);
   }
-
   cout << endl;
+  // Control loop
   for (k = 0; k < 2; k++) {
 
     if (k > 0){
