@@ -1,0 +1,1 @@
+/usr/bin/c++    -pthread -Wall -funroll-loops -march=native -maes -mrdseed -std=c++11 -O0 -ggdb -g  -rdynamic CMakeFiles/test_test/cloud.dir/test/cloud.cpp.o  -o bin/test_test/cloud  -lssl -lcrypto -lemp-tool 

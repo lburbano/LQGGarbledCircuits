@@ -1,0 +1,16 @@
+/home/luisvm/Documents/lqg/CMakeFiles/install/strip.dir
+/home/luisvm/Documents/lqg/CMakeFiles/install/local.dir
+/home/luisvm/Documents/lqg/CMakeFiles/install.dir
+/home/luisvm/Documents/lqg/CMakeFiles/list_install_components.dir
+/home/luisvm/Documents/lqg/CMakeFiles/rebuild_cache.dir
+/home/luisvm/Documents/lqg/CMakeFiles/edit_cache.dir
+/home/luisvm/Documents/lqg/CMakeFiles/test.dir
+/home/luisvm/Documents/lqg/test/CMakeFiles/install/local.dir
+/home/luisvm/Documents/lqg/test/CMakeFiles/install.dir
+/home/luisvm/Documents/lqg/test/CMakeFiles/list_install_components.dir
+/home/luisvm/Documents/lqg/test/CMakeFiles/rebuild_cache.dir
+/home/luisvm/Documents/lqg/test/CMakeFiles/edit_cache.dir
+/home/luisvm/Documents/lqg/test/CMakeFiles/test.dir
+/home/luisvm/Documents/lqg/test/CMakeFiles/install/strip.dir
+/home/luisvm/Documents/lqg/test/CMakeFiles/system.dir
+/home/luisvm/Documents/lqg/test/CMakeFiles/cloud.dir
