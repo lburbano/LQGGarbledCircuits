@@ -13,9 +13,13 @@ $ cd build
 $ cmake ..
 $ make
 ```
-# Running 
+## Running 
 Terminal 1
-* ./bin/system 1 12345
+'''
+./bin/system 1 12345
+'''
 
 Terminal 2
-* ./bin/cloud 2 12345
+'''
+./bin/cloud 2 12345
+'''
