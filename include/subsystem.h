@@ -1,5 +1,5 @@
 // This class represents the physical system.
-// 
+// Change all Alice to BOB?
 #ifndef SUBSYSTEM_H
 #define SUBSYSTEM_H
 #include "fixedPoint.h"

@@ -1,3 +1,4 @@
+// Change all Alice to BOB?
 #ifndef CLOUD_H
 #define CLOUD_H
 #include "fixedPoint.h"
@@ -201,7 +202,9 @@ public:
     }
     for (int i = 0; i < this->sizeresidues[0]; i++) {
       for (int j = 0; j < this->sizeresidues[1]; j++) {
-        this->residues[i][j] = fixedPoint(0, 24, 24, ALICE);
+        this->residues[i][j] = fixedPoint(0, 24, 24, ALICE); // Should we change this?
+                                                             // Maybe this should be a parameter of the function
+                                                             // cloud should learn nothing about this value
       }
     }
 
@@ -213,7 +216,7 @@ public:
     }
     for (int i = 0; i < this->sizeuk[0]; i++) {
       for (int j = 0; j < this->sizeuk[1]; j++) {
-        this->uk[i][j] = fixedPoint(0, 24, 24, ALICE);
+        this->uk[i][j] = fixedPoint(0, 24, 24, ALICE);      
       }
     } 
     
@@ -224,7 +227,9 @@ public:
     }
     for (int i = 0; i < this->sizeA_BK[0]; i++) {
       Bit zero(0, ALICE);
-      this->alarm[i][0] = zero;
+      this->alarm[i][0] = zero;                               // Should we change this?
+                                                              // Maybe this should be a parameter of the function
+                                                              // cloud should learn nothing about this value
     }
   }
 
@@ -289,12 +294,17 @@ public:
   void computeCusum()//fixedPoint **xHat, fixedPoint **uk)
   {
     Bit *clipBelow = new Bit[this->sizexHatk[0]]; 
+    Bit zero(0, ALICE);                                      // Should we change this?
+                                                             // Maybe this should be a parameter of the function
+                                                             // cloud should learn nothing about this value
+    fixedPoint zeroFixed = fixedPoint(0, 24, 24, ALICE);     // Should we change this?
+                                                             // Maybe this should be a parameter of the function
+                                                             // cloud should learn nothing about this value
     for (int i = 0; i < this->sizexHatk[0]; i++) {
       this->Cusum[i][0] = this->Cusum[i][0] + this->residues[i][0] - this->nu[i][0];
       this->Cusum[i][0] = this->Cusum[i][0].toZero(this->alarm[i][0]);
-      clipBelow[i] = fixedPoint(0, 24, 24, ALICE).operator>( this->Cusum[i][0] ); 
+      clipBelow[i] = zeroFixed.operator>( this->Cusum[i][0] ); 
       this->Cusum[i][0] = this->Cusum[i][0].toZero(clipBelow[i]);
-      Bit zero(0, ALICE);
       this->alarm[i][0] = zero;
       this->alarm[i][0] = this->Cusum[i][0].operator>(this->tau[i][0]);
     }

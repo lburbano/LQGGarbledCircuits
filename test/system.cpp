@@ -1,5 +1,5 @@
 // Implements the system side of the protocol
-#include "Actuator.h"
+// CHange all Alice to BOB?
 #include "Cloud.h"
 #include "emp-tool/execution/circuit_execution.h"
 #include "subsystem.h"
@@ -59,6 +59,13 @@ void print_rest(Cloud *cloud, subSystem *subsystem, int k) {
     cout << endl;
   }
   cout << endl << endl;
+
+  cout << "Alarms: k=" << k << ":  " << endl;
+  for (int i = 0; i < cloud->sizeyp[0]; i++) {
+    cout << cloud->alarm[i]->reveal(ALICE) << ", ";
+    cout << endl;
+  }
+  cout << endl << endl;
 }
 
 int main(int argc, char **argv) {
@@ -100,7 +107,7 @@ int main(int argc, char **argv) {
   }
   cout << endl;
   // Control loop
-  for (k = 0; k < 2; k++) {
+  for (k = 0; k < 20; k++) {
 
     if (k > 0){
       cloud->predict();

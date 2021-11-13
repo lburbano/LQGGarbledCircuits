@@ -1,7 +1,7 @@
 #ifndef SUBSYSTEM_H
 #define SUBSYSTEM_H
 #include "fixedPoint.h"
-
+// CHange all Alice to BOB?
 class subSystem {
 public:
   // declares the constants for the system.

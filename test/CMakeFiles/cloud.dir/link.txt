@@ -1,1 +1,0 @@
-/usr/bin/c++    -pthread -Wall -funroll-loops -march=native -maes -mrdseed -std=c++11 -O3 -O3 -DNDEBUG  -rdynamic CMakeFiles/cloud.dir/cloud.cpp.o  -o ../bin/cloud  -Wl,-rpath,/usr/local/lib /usr/local/lib/libemp-tool.so -lssl -lcrypto 

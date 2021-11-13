@@ -8,7 +8,9 @@ $ ./setup.sh
 ## Building
 To build this project, follow the next steps:
 ```
-$ cmake .
+$ mkdir build
+$ cd build
+$ cmake ..
 $ make
 ```
 # Running 

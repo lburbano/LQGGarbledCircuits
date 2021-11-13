@@ -1,7 +1,2 @@
-/bin
-Setup.h
-DummySetup.h
-CTestTestfile.cmake
-cmake_install.cmake
-CTestTestfile.cmake
-CMakeCache.txt
+/build
+/.vscode
