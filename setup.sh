@@ -4,7 +4,7 @@ cd tmp
 
 echo "Installing emp-toolkit"
 wget https://raw.githubusercontent.com/emp-toolkit/emp-readme/master/scripts/install.py
-python3 install.py -install -tool -sh2pc
+python3 install.py -install --tool --sh2pc --ot
 echo "Done installing emp-toolkit"
 
 cd ..
