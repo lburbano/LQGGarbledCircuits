@@ -32,9 +32,6 @@ public:
   fixedPoint **C;
   double **C_ne;
   int sizeC[2];
-  fixedPoint **xtemp;
-  double **xtemp_ne;
-  int sizextemp[2];
   double **uk_ne;
 
   fixedPoint **L;
@@ -74,8 +71,10 @@ public:
   fixedPoint **Cusum;
   int sizeNu[2];
   fixedPoint **Nu;
+  double **Nu_ne;
   int sizeTau[2];
   fixedPoint **Tau;
+  double **Tau_ne;
 
 
   fixedPoint **uTilder;
@@ -89,6 +88,10 @@ public:
   int sizexHatk[2];
   fixedPoint **uk;
   int sizeuk[2];
+
+  int decimalBits = 24;
+  int integerBits = decimalBits;
+  int totalBits = decimalBits + integerBits;
 
   subSystem() {}
 
@@ -121,12 +124,8 @@ public:
   // Updates zk to use it in the emp library for the next iteration
   void computezk() {
     matrixMulNE(this->C_ne, this->xk_ne, this->zk_ne, this->sizeC, this->sizexk);
-    for (int i = 0; i < this->sizezk[0]; i++) {
-      this->zk[i] = new fixedPoint[this->sizezk[1]];
-      for (int j = 0; j < this->sizezk[1]; j++) {
-        this->zk[i][j] = fixedPoint(zk_ne[i][j], 24, 24, ALICE);
-      }
-    }
+    setData_GC( this->zk, zk_ne, this->sizezk, ALICE);
+    
   }
 
   // Computes the gamma matrices in plaintext.
@@ -174,32 +173,10 @@ public:
   // Assumes that the constants are already computed in plaintext
   void garbleControlConstants() {
     // gamma3
-    for (int i = 0; i < this->sizegamma3[0]; i++) {
-      for (int j = 0; j < this->sizegamma3[1]; j++) {
-        this->gamma3[i][j] = fixedPoint(this->gamma3_ne[i][j], 24, 24, ALICE);
-      }
-    }
-
-    // gamma2
-    for (int i = 0; i < this->sizegamma2[0]; i++) {
-      for (int j = 0; j < this->sizegamma2[1]; j++) {
-        this->gamma2[i][j] = fixedPoint(this->gamma2_ne[i][j], 24, 24, ALICE);
-      }
-    }
-
-    // gamma1
-    for (int i = 0; i < this->sizegamma1[0]; i++) {
-      for (int j = 0; j < this->sizegamma1[1]; j++) {
-        this->gamma1[i][j] = fixedPoint(this->gamma1_ne[i][j], 24, 24, ALICE);
-      }
-    }
-    
-    // A-BK 
-    for (int i = 0; i < this->sizeA[0]; i++) {
-      for (int j = 0; j < this->sizeA[1]; j++) {
-        this->A_BK[i][j] = fixedPoint(this->A_BK_ne[i][j], 24, 24, ALICE);
-      }
-    }   
+    setData_GC(this->gamma3, this->gamma3_ne, this->sizegamma3, ALICE);
+    setData_GC(this->gamma2, this->gamma2_ne, this->sizegamma2, ALICE);
+    setData_GC(this->gamma1, this->gamma1_ne, this->sizegamma1, ALICE);
+    setData_GC(this->A_BK, this->A_BK_ne, this->sizeA, ALICE);
   }
 
 
@@ -208,17 +185,12 @@ public:
   void computeReferenceConstants() {
     this->sizeuTilder[0] = sizeur[0];
     this->sizeuTilder[1] = sizeur[1];
-    this->uTilder_ne = new double *[this->sizeuTilder[0]];
-    for (int i = 0; i < this->sizeuTilder[0]; i++) {
-      this->uTilder_ne[i] = new double[this->sizeuTilder[1]];
-    }
+    this->uTilder_ne = initSize(this->uTilder_ne, this->sizeuTilder);
 
     this->sizexgamma[0] = sizexr[0];
     this->sizexgamma[1] = sizexr[1];
-    this->xgamma_ne = new double *[this->sizexgamma[0]]; 
-    for (int i = 0; i < this->sizexgamma[0]; i++) {
-      this->xgamma_ne[i] = new double[this->sizexgamma[1]];
-    }
+    this->xgamma_ne = initSize(this->xgamma_ne, this->sizexgamma);
+    
 
     double **Kxr_ne = new double *[this->sizeK[0]];
     for (int i = 0; i < this->sizeK[0]; i++) {
@@ -257,48 +229,170 @@ public:
   // Creates a representation of the constants related to references to be used with the emp toolkit
   // Assumes that constants are already computed in plaintext.
   void garbleReferenceConstants() {
-    this->uTilder = new fixedPoint *[this->sizeuTilder[0]];
-    for (int i = 0; i < this->sizeuTilder[0]; i++) {
-      this->uTilder[i] = new fixedPoint[this->sizeuTilder[1]];
-    }
-
-    this->xgamma = new fixedPoint *[this->sizexgamma[0]];
-    for (int i = 0; i < this->sizexgamma[0]; i++) {
-      this->xgamma[i] = new fixedPoint[this->sizexgamma[1]];
-    }    
-
-    for (int i = 0; i < this->sizeuTilder[0]; i++) {
-      for (int j = 0; j < this->sizeuTilder[1]; j++) {
-        this->uTilder[i][j] = fixedPoint(this->uTilder_ne[i][j], 24, 24, ALICE);
-      }
-    }
-    for (int i = 0; i < this->sizexgamma[0]; i++) {
-      for (int j = 0; j < this->sizexgamma[1]; j++) {
-        this->xgamma[i][j] = fixedPoint(this->xgamma_ne[i][j], 24, 24, ALICE);
-      }
-    }
+    this->uTilder = initSize_GC(this->uTilder, this->sizeuTilder);
+    this->xgamma = initSize_GC(this->xgamma, this->sizexgamma);
+    setData_GC( this->uTilder, this->uTilder_ne, this->sizeuTilder, ALICE);
+    setData_GC( this->xgamma, this->xgamma_ne, this->sizexgamma, ALICE);
 
     for (int i = 0; i < this->sizeB[0]; i++) {
       for (int j = 0; j < this->sizexk[1]; j++) {
-        this->Bug[i][j] = fixedPoint(this->Bug_ne[i][j], 24, 24, ALICE);
-        
+        this->Bug[i][j] = fixedPoint(this->Bug_ne[i][j], decimalBits, integerBits, ALICE);
       }
     }
+
+  }  
+  // loads all the matrices required to compute the controller
+  // and to simulate the system behavior
+  void inputData() {
+    
+    // Load matrix A
+    this->A_ne = initSizeFile(this->A_ne, "Data/A.txt", this->sizeA);
+    readFile(this->A_ne, "Data/A.txt", this->sizeA);
+    this->A = initSize_GC(this->A, this->sizeA);
+
+    // Load matrix B
+    this->B_ne = initSizeFile(this->B_ne, "Data/B.txt", this->sizeB);
+    readFile(this->B_ne, "Data/B.txt", this->sizeB);
+    this->B = initSize_GC(this->B, this->sizeB);
+
+    // Load matrix C
+    this->C_ne = initSizeFile(this->C_ne, "Data/C.txt", this->sizeC);
+    readFile(this->C_ne, "Data/C.txt", this->sizeC);
+    this->C = initSize_GC(this->C, this->sizeC);
+
+    // Load vector ur
+    this->ur_ne = initSizeFile(this->ur_ne, "Data/ur.txt", this->sizeur);
+    readFile(this->ur_ne, "Data/ur.txt", this->sizeur);
+
+    // Initializa vector uk
+    this->sizeuk[0] = this->sizeur[0];
+    this->sizeuk[1] = this->sizeur[1];
+    this->uk_ne = initSize(this->uk_ne, this->sizeuk);
+
+    // Load vector ur
+    this->ur = initSize_GC(this->ur, this->sizeur);
+    this->xr_ne = initSizeFile(this->xr_ne, "Data/xr.txt", this->sizexr);
+    readFile(this->xr_ne, "Data/xr.txt", this->sizexr);
+    this->xr = initSize_GC(this->xr, this->sizexr);
+
+    // Load vector x0
+    this->x0_ne = initSizeFile(this->x0_ne, "Data/x0.txt", this->sizex0);
+    readFile(this->x0_ne, "Data/x0.txt", this->sizex0);
+    this->x0 = initSize_GC(this->x0, this->sizex0);
+    
+    // Load matrix K
+    this->K_ne = initSizeFile(this->K_ne, "Data/K.txt", this->sizeK);
+    readFile(this->K_ne, "Data/K.txt", this->sizeK);
+    this->K = initSize_GC(this->K, this->sizeK);
+
+    // Load matrix L
+    this->L_ne = initSizeFile(this->L_ne, "Data/L.txt", this->sizeL);
+    readFile(this->L_ne, "Data/L.txt", this->sizeL);
+    this->L = initSize_GC(this->L, this->sizeL);
+    
+    // Load \nu
+    this->Nu_ne = initSizeFile(this->Nu_ne, "Data/Nu.txt", this->sizeNu);
+    readFile(this->Nu_ne, "Data/Nu.txt", this->sizeNu);
+    this->Nu = initSize_GC(this->Nu, this->sizeNu);
+
+
+    
+    this->Tau_ne = initSizeFile(this->Tau_ne, "Data/Tau.txt", this->sizeTau);
+    readFile(this->Tau_ne, "Data/Tau.txt", this->sizeTau);
+    this->Tau = initSize_GC(this->Tau, this->sizeTau);
+
+    // Load zk
+    this->sizezk[0] = this->sizeC[0];
+    this->sizezk[1] = this->sizex0[1];
+    this->zk = initSize_GC( this->zk, this->sizezk );
+    this->zk_ne = initSize( this->zk_ne, this->sizezk );
+    
+    this->sizexk[0] = this->sizex0[0];
+    this->sizexk[1] = this->sizex0[1];
+    this->xk = initSize_GC( this->xk, this->sizexk);
+    this->xk_ne = initSize( this->xk_ne, this->sizexk);
+    
+    setData_GC( this->A, this->A_ne, this->sizeA, ALICE);
+    setData_GC( this->B, this->B_ne, this->sizeB, ALICE);
+    setData_GC( this->C, this->C_ne, this->sizeC, ALICE);
+    setData_GC( this->ur, this->ur_ne, this->sizeur, ALICE);  
+    setData_GC( this->xr, this->xr_ne, this->sizexr, ALICE);
+    setData_GC( this->x0, this->x0_ne, this->sizex0, ALICE);
+    setData_GC( this->xk, this->x0_ne, this->sizexk, ALICE);
+    setData( this->xk_ne,  this->x0_ne, this->sizexk);
+
+    setData_GC( this->zk, this->x0_ne, this->sizezk, ALICE);
+    setData( this->zk_ne,  this->x0_ne, this->sizezk);
+    
+
+    // negative because K.txt holds the nagation of the control gain K
+    for (int i = 0; i < this->sizeK[0]; i++) {
+      for (int j = 0; j < this->sizeK[1]; j++) {
+        this->K_ne[i][j] = -this->K_ne[i][j];
+        this->K[i][j] = fixedPoint((this->K_ne[i][j]), decimalBits, integerBits, ALICE);
+      }
+    }
+
+    setData_GC( this->L, this->L_ne, this->sizeL, ALICE);
+    setData_GC( this->Nu, this->Nu_ne, this->sizeNu, ALICE);
+    setData_GC( this->Tau, this->Tau_ne, this->sizeTau, ALICE);
+
+
+    
+
+    this->sizegamma3[0] = this->sizeB[0];
+    this->sizegamma3[1] = this->sizeB[1];
+    this->sizeLC[0] = this->sizeL[0];
+    this->sizeLC[1] = this->sizeC[1];
+    this->sizegamma2[0] = this->sizegamma3[0];
+    this->sizegamma2[1] = this->sizeK[1];
+    this->sizegamma1[0] = this->sizeA[0];
+    this->sizegamma1[1] = this->sizeA[1];
+    this->sizeA_BK[0] = this->sizeA[0];
+    this->sizeA_BK[1] = this->sizeA[1];
+    this->sizeBug[0] = this->sizeB[0];
+    this->sizeBug[1] = this->sizexk[1];
+    this->sizeLCB[0] = this->sizeLC[0];
+    this->sizeLCB[1] = this->sizeB[1];
+
+    this->gamma3 = initSize_GC(this->gamma3, this->sizegamma3);
+    this->gamma3_ne = initSize(this->gamma3_ne, this->sizegamma3);
+
+    this->LC = initSize_GC(this->LC, this->sizeLC);
+    this->LC_ne = initSize(this->LC_ne, this->sizeLC);
+    
+    this->LCB = initSize_GC(this->LCB, this->sizeLCB);
+    this->LCB_ne = initSize(this->LCB_ne, this->sizeLCB);
+
+    this->gamma2 = initSize_GC(this->gamma2, this->sizegamma2);
+    this->gamma2_ne = initSize(this->gamma2_ne, this->sizegamma2);
+    
+    this->gamma1 = initSize_GC(this->gamma1, this->sizegamma1);
+    this->gamma1_ne = initSize(this->gamma1_ne, this->sizegamma1);
+
+    this->LCA = initSize_GC(this->LCA, this->sizeA);
+    this->LCA_ne = initSize(this->LCA_ne, this->sizeA);
+
+    this->A_BK = initSize_GC(this->A_BK, this->sizeA_BK);
+    this->A_BK_ne = initSize(this->A_BK_ne, this->sizeA_BK);
+
+    this->Bug = initSize_GC(this->Bug, this->sizeBug);
+    this->Bug_ne = initSize(this->Bug_ne, this->sizeBug);
+
+    
+
   }
-
-
-///////////////////////////////////////////////////////////////////////////
-// Functions required for the operations. Not focused on the control system
-///////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////
+  // Functions required for the operations. Not focused on the control system
+  /////////////////////////////////////x//////////////////////////////////////
 
   // Computes the multiplication between matrices A and B
   void matrixMul(fixedPoint **A, fixedPoint **B, fixedPoint **ret, int *ASize,
                  int *BSize) {
-    fixedPoint zero(0, 24, 24, PUBLIC);
     for (int i = 0; i < ASize[0]; i++) {
       for (int j = 0; j < BSize[1]; j++) {
-        ret[i][j] = zero;
-        for (int k = 0; k < ASize[1]; k++) {
+        ret[i][j] = (A[i][0] * B[0][j]);
+        for (int k = 1; k < ASize[1]; k++) {
           ret[i][j] = ret[i][j] + (A[i][k] * B[k][j]);
         }
       }
@@ -321,10 +415,9 @@ public:
   // Computes the multiplication between matrix A and vector B
   void matrixVecMul(fixedPoint **A, fixedPoint **B, fixedPoint *ret,
                     int *size) {
-    fixedPoint zero(0, 24, 24, PUBLIC);
     for (int i = 0; i < size[0]; i++) {
-      ret[i] = zero;
-      for (int j = 0; j < size[1]; j++) {
+      ret[i] = ((A[i][0]) * (B[0][0]));
+      for (int j = 1; j < size[1]; j++) {
         ret[i] = ret[i] + ((A[i][j]) * (B[j][0]));
       }
     }
@@ -383,391 +476,72 @@ public:
       i++;
     }
   }
-
-  // loads all the matrices required to compute the controller
-  // and to simulate the system behavior
-  void inputData() {
-
-    getFileSize("Data/A.txt", this->sizeA);
-    this->A_ne = new double *[this->sizeA[0]];
-    for (int i = 0; i < this->sizeA[0]; i++) {
-      this->A_ne[i] = new double[this->sizeA[1]];
+  
+  // Initialize variables used for Garbled Circuits
+  fixedPoint** initSizeFile_GC(fixedPoint **in, string fileName, int *size){
+    getFileSize(fileName, size);
+    in = new fixedPoint *[ size[0] ];
+    for( int i = 0; i < size[0]; i++ ){
+      in[i] = new fixedPoint[ size[1] ];
     }
+    return in;
+  }
 
-    readFile(this->A_ne, "Data/A.txt", this->sizeA);
-    this->A = new fixedPoint *[this->sizeA[0]];
-    for (int i = 0; i < this->sizeA[0]; i++) {
-      this->A[i] = new fixedPoint[this->sizeA[1]];
+  fixedPoint** initSize_GC(fixedPoint **in, int *size){
+    in = new fixedPoint *[ size[0] ];
+    for( int i = 0; i < size[0]; i++ ){
+      in[i] = new fixedPoint[ size[1] ];
     }
+    return in;
+  }
 
-    getFileSize("Data/B.txt", this->sizeB);
-    this->B_ne = new double *[this->sizeB[0]];
-    for (int i = 0; i < this->sizeB[0]; i++) {
-      this->B_ne[i] = new double[this->sizeB[1]];
-    }
-
-    readFile(this->B_ne, "Data/B.txt", this->sizeB);
-    this->B = new fixedPoint *[this->sizeB[0]];
-    for (int i = 0; i < this->sizeB[0]; i++) {
-      this->B[i] = new fixedPoint[this->sizeB[1]];
-    }
-
-    getFileSize("Data/C.txt", this->sizeC);
-    this->C_ne = new double *[this->sizeC[0]];
-    for (int i = 0; i < this->sizeC[0]; i++) {
-      this->C_ne[i] = new double[this->sizeC[1]];
-    }
-
-    readFile(this->C_ne, "Data/C.txt", this->sizeC);
-    this->C = new fixedPoint *[this->sizeC[0]];
-    for (int i = 0; i < this->sizeC[0]; i++) {
-      this->C[i] = new fixedPoint[this->sizeC[1]];
-    }
-
-    getFileSize("Data/ur.txt", this->sizeur);
-    this->ur_ne = new double *[this->sizeur[0]];
-    this->uk_ne = new double *[this->sizeur[0]];
-    for (int i = 0; i < this->sizeur[0]; i++) {
-      this->ur_ne[i] = new double[this->sizeur[1]];
-      this->uk_ne[i] = new double[this->sizeur[1]];
-    }
-
-    readFile(this->ur_ne, "Data/ur.txt", this->sizeur);
-    this->ur = new fixedPoint *[this->sizeur[0]];
-    for (int i = 0; i < this->sizeur[0]; i++) {
-      this->ur[i] = new fixedPoint[this->sizeur[1]];
-    }
-
-    getFileSize("Data/xr.txt", this->sizexr);
-    this->xr_ne = new double *[this->sizexr[0]];
-    for (int i = 0; i < this->sizexr[0]; i++) {
-      this->xr_ne[i] = new double[this->sizexr[1]];
-    }
-
-    readFile(this->xr_ne, "Data/xr.txt", this->sizexr);
-    this->xr = new fixedPoint *[this->sizexr[0]];
-    for (int i = 0; i < this->sizexr[0]; i++) {
-      this->xr[i] = new fixedPoint[this->sizexr[1]];
-    }
-
-    getFileSize("Data/x0.txt", this->sizex0);
-    this->x0_ne = new double *[this->sizex0[0]];
-    for (int i = 0; i < this->sizex0[0]; i++) {
-      this->x0_ne[i] = new double[this->sizex0[1]];
-    }
-    readFile(this->x0_ne, "Data/x0.txt", this->sizex0);
-    this->x0 = new fixedPoint *[this->sizex0[0]];
-    for (int i = 0; i < this->sizex0[0]; i++) {
-      this->x0[i] = new fixedPoint[this->sizex0[1]];
-    }
-
-    double **dataK;
-    getFileSize("Data/K.txt", this->sizeK);
-    this->K_ne = new double *[this->sizeK[0]];
-    dataK = new double *[this->sizeK[0]];
-    for (int i = 0; i < this->sizeK[0]; i++) {
-      dataK[i] = new double[this->sizeK[1]];
-      this->K_ne[i] = new double[this->sizeK[1]];
-    }
-
-    readFile(dataK, "Data/K.txt", this->sizeK);
-    this->K = new fixedPoint *[this->sizeK[0]];
-    for (int i = 0; i < this->sizeK[0]; i++) {
-      this->K[i] = new fixedPoint[this->sizeK[1]];
-    }
-    // cout<< dataK<<endl;
-
-    double **dataL;
-    getFileSize("Data/L.txt", this->sizeL);
-    this->L_ne = new double *[this->sizeL[0]];
-    dataL = new double *[this->sizeL[0]];
-    for (int i = 0; i < this->sizeL[0]; i++) {
-      this->L_ne[i] = new double[this->sizeL[1]];
-      dataL[i] = new double[this->sizeL[1]];
-    }
-
-    readFile(dataL, "Data/L.txt", this->sizeL);
-    this->L = new fixedPoint *[this->sizeL[0]];
-    for (int i = 0; i < this->sizeL[0]; i++) {
-      this->L[i] = new fixedPoint[this->sizeL[1]];
-    }
-
-    double **dataA;
-    getFileSize("Data/A.txt", this->sizeA);
-    this->A_ne = new double *[this->sizeA[0]];
-    dataA = new double *[this->sizeA[0]];
-    for (int i = 0; i < this->sizeA[0]; i++) {
-      this->A_ne[i] = new double[this->sizeA[1]];
-      dataA[i] = new double[this->sizeA[1]]; 
-    }
-
-    readFile(dataA, "Data/A.txt", this->sizeA);
-    this->A = new fixedPoint *[this->sizeA[0]];
-    for (int i = 0; i < this->sizeA[0]; i++) {
-      this->A[i] = new fixedPoint[this->sizeA[1]];
-    }
-
-    double **dataB;
-    getFileSize("Data/B.txt", this->sizeB);
-    this->B_ne = new double *[this->sizeB[0]];
-    dataB = new double *[this->sizeB[0]];
-    for (int i = 0; i < this->sizeB[0]; i++) {
-      this->B_ne[i] = new double[this->sizeB[1]];
-      dataB[i] = new double[this->sizeB[1]];
-    }
-
-    readFile(dataB, "Data/B.txt", this->sizeB);
-    this->B = new fixedPoint *[this->sizeB[0]];
-    for (int i = 0; i < this->sizeB[0]; i++) {
-      this->B[i] = new fixedPoint[this->sizeB[1]];
-    }
-
-    double **dataC;
-    getFileSize("Data/C.txt", this->sizeC);
-    this->C_ne = new double *[this->sizeC[0]];
-    dataC = new double *[this->sizeC[0]];
-    for (int i = 0; i < this->sizeC[0]; i++) {
-      this->C_ne[i] = new double[this->sizeC[1]];
-      dataC[i] = new double[this->sizeC[1]];
-    }
-
-    readFile(dataC, "Data/C.txt", this->sizeC);
-    this->C = new fixedPoint *[this->sizeC[0]];
-    for (int i = 0; i < this->sizeC[0]; i++) {
-      this->C[i] = new fixedPoint[this->sizeC[1]];
-    }
-
-    // Read CUSUM parameters Nu
-    double **dataNu;
-    getFileSize("Data/Nu.txt", this->sizeNu);
-    dataNu = new double *[this->sizeNu[0]];
-    for (int i = 0; i < this->sizeNu[0]; i++) {
-      dataNu[i] = new double[this->sizeNu[1]];
-    }
-
-    readFile(dataNu, "Data/Nu.txt", this->sizeNu);
-    this->Nu = new fixedPoint *[this->sizeNu[0]];
-    for (int i = 0; i < this->sizeNu[0]; i++) {
-      this->Nu[i] = new fixedPoint[this->sizeNu[1]];
-    }
-
-    double **dataTau;
-    getFileSize("Data/Tau.txt", this->sizeTau);
-    dataTau = new double *[this->sizeTau[0]];
-    for (int i = 0; i < this->sizeTau[0]; i++) {
-      dataTau[i] = new double[this->sizeTau[1]];
-    }
-
-    readFile(dataTau, "Data/Tau.txt", this->sizeTau);
-    this->Tau = new fixedPoint *[this->sizeTau[0]];
-    for (int i = 0; i < this->sizeTau[0]; i++) {
-      this->Tau[i] = new fixedPoint[this->sizeTau[1]];
-    }
-
-
-    // cout << "Load data x0" << endl;
-
-    this->sizezk[0] = this->sizeC[0];
-    this->sizezk[1] = this->sizex0[1];
-    this->zk = new fixedPoint *[this->sizezk[0]];
-    this->zk_ne = new double *[this->sizezk[0]];
-    for (int i = 0; i < this->sizezk[0]; i++) {
-      this->zk[i] = new fixedPoint[this->sizezk[1]];
-      this->zk_ne[i] = new double[this->sizezk[1]];
-    }
-
-    this->sizexk[0] = this->sizex0[0];
-    this->sizexk[1] = this->sizex0[1];
-    this->xk = new fixedPoint *[this->sizexk[0]];
-    this->xk_ne = new double *[this->sizexk[0]];
-    for (int i = 0; i < this->sizexk[0]; i++) {
-      this->xk[i] = new fixedPoint[this->sizexk[1]];
-      this->xk_ne[i] = new double[this->sizexk[1]];
-    }
-
-    this->sizextemp[0] = this->sizex0[0];
-    this->sizextemp[1] = this->sizex0[1];
-    this->xtemp = new fixedPoint *[this->sizextemp[0]];
-    this->xtemp_ne = new double *[this->sizextemp[0]];
-    for (int i = 0; i < this->sizextemp[0]; i++) {
-      this->xtemp[i] = new fixedPoint[this->sizextemp[1]];
-      this->xtemp_ne[i] = new double[this->sizextemp[1]];
-    }
-
-    for (int i = 0; i < this->sizeA[0]; i++) {
-      for (int j = 0; j < this->sizeA[1]; j++) {
-        this->A[i][j] = fixedPoint(this->A_ne[i][j], 24, 24, ALICE);
+  void setZero_GC(fixedPoint **in, int *size, int party){
+    for (int i = 0; i < size[0]; i++) {
+      for (int j = 0; j < size[1]; j++) {
+        in[i][j] = fixedPoint(0, decimalBits, integerBits, party);
       }
     }
-
-    for (int i = 0; i < this->sizeB[0]; i++) {
-      for (int j = 0; j < this->sizeB[1]; j++) {
-        this->B[i][j] = fixedPoint(this->B_ne[i][j], 24, 24, ALICE);
+  }
+  
+  void setData_GC(fixedPoint **in, double **data, int *size, int party){
+    for (int i = 0; i < size[0]; i++) {
+      for (int j = 0; j < size[1]; j++) {
+        in[i][j] = fixedPoint(data[i][j], decimalBits, integerBits, party);
       }
     }
+  }
+  // Initialize matrices double
+  double** initSizeFile(double **in, string fileName, int *size){
+    getFileSize(fileName, size);
+    in = new double *[ size[0] ];
+    for( int i = 0; i < size[0]; i++ ){
+      in[i] = new double[ size[1] ];
+    }
+    return in;
+  }
 
-    for (int i = 0; i < this->sizeC[0]; i++) {
-      for (int j = 0; j < this->sizeC[1]; j++) {
-        this->C[i][j] = fixedPoint(this->C_ne[i][j], 24, 24, ALICE);
+  double** initSize(double **in, int *size){
+    in = new double *[ size[0] ];
+    for( int i = 0; i < size[0]; i++ ){
+      in[i] = new double[ size[1] ];
+    }
+    return in;
+  }
+
+  void setZero(double **in, int *size, int party){
+    for (int i = 0; i < size[0]; i++) {
+      for (int j = 0; j < size[1]; j++) {
+        in[i][j] = 0;
       }
     }
+  }
 
-    for (int i = 0; i < this->sizeur[0]; i++) {
-      for (int j = 0; j < this->sizeur[1]; j++) {
-        // cout << "ur: " << this->ur_ne[i][j] << endl;
-        this->ur[i][j] = fixedPoint(this->ur_ne[i][j], 24, 24, ALICE);
+  void setData(double **in, double **data, int *size){
+    for (int i = 0; i < size[0]; i++) {
+      for (int j = 0; j < size[1]; j++) {
+        in[i][j] = data[i][j];
       }
     }
-
-    for (int i = 0; i < this->sizexr[0]; i++) {
-      for (int j = 0; j < this->sizexr[1]; j++) {
-        this->xr[i][j] = fixedPoint(this->xr_ne[i][j], 24, 24, ALICE);
-      }
-    }
-
-    for (int i = 0; i < this->sizex0[0]; i++) {
-      for (int j = 0; j < this->sizex0[1]; j++) {
-        this->x0[i][j] = fixedPoint(this->x0_ne[i][j], 24, 24, ALICE);
-      }
-    }
-
-    for (int i = 0; i < this->sizexk[0]; i++) {
-      for (int j = 0; j < this->sizexk[1]; j++) {
-        this->xk[i][j] = fixedPoint(this->x0_ne[i][j], 24, 24, ALICE);
-        this->xk_ne[i][j] = this->x0_ne[i][j];
-      }
-    }
-
-    for (int i = 0; i < this->sizextemp[0]; i++) {
-      for (int j = 0; j < this->sizextemp[1]; j++) {
-        this->xtemp[i][j] = fixedPoint(this->x0_ne[i][j], 24, 24, ALICE);;
-        this->xtemp_ne[i][j] = this->xk_ne[i][j];
-      }
-    }
-
-    for (int i = 0; i < this->sizezk[0]; i++) {
-      for (int j = 0; j < this->sizezk[1]; j++) {
-        this->zk[i][j] = fixedPoint(this->x0_ne[i][j], 24, 24, ALICE);; 
-        this->zk_ne[i][j] = this->xk_ne[i][j];
-      }
-    }
-
-    // negative because K.txt holds the nagation of the control gain K
-    for (int i = 0; i < this->sizeK[0]; i++) {
-      for (int j = 0; j < this->sizeK[1]; j++) {
-        this->K_ne[i][j] = -dataK[i][j];
-        this->K[i][j] = fixedPoint(-(dataK[i][j]), 24, 24, ALICE);
-      }
-    }
-
-    for (int i = 0; i < this->sizeL[0]; i++) {
-      for (int j = 0; j < this->sizeL[1]; j++) {
-        this->L_ne[i][j] = dataL[i][j];
-        this->L[i][j] = fixedPoint(dataL[i][j], 24, 24, ALICE);
-      }
-    }
-
-    for (int i = 0; i < this->sizeA[0]; i++) {
-      for (int j = 0; j < this->sizeA[1]; j++) {
-        A_ne[i][j] = dataA[i][j];
-        this->A[i][j] = fixedPoint(dataA[i][j], 24, 24, ALICE);
-      }
-    }
-
-    for (int i = 0; i < this->sizeB[0]; i++) {
-      for (int j = 0; j < this->sizeB[1]; j++) {
-        this->B_ne[i][j] = dataB[i][j];
-        this->B[i][j] = fixedPoint(dataB[i][j], 24, 24, ALICE);
-      }
-    }
-
-    for (int i = 0; i < this->sizeC[0]; i++) {
-      for (int j = 0; j < this->sizeC[1]; j++) {
-        this->C_ne[i][j] = dataC[i][j];
-        this->C[i][j] = fixedPoint(dataC[i][j], 24, 24, ALICE);
-      }
-    }
-
-    for (int i = 0; i < this->sizeNu[0]; i++) {
-      for (int j = 0; j < this->sizeNu[1]; j++) {
-        this->Nu[i][j] = fixedPoint(dataNu[i][j], 24, 24, ALICE);
-      }
-    }
-
-    for (int i = 0; i < this->sizeTau[0]; i++) {
-      for (int j = 0; j < this->sizeTau[1]; j++) {
-        this->Tau[i][j] = fixedPoint(dataTau[i][j], 24, 24, ALICE);
-      }
-    }
-
-    this->sizegamma3[0] = this->sizeB[0];
-    this->sizegamma3[1] = this->sizeB[1];
-    this->gamma3 = new fixedPoint *[this->sizegamma3[0]];
-    this->gamma3_ne = new double *[this->sizegamma3[0]];
-    for (int i = 0; i < this->sizegamma3[0]; i++) {
-      this->gamma3[i] = new fixedPoint[this->sizegamma3[1]];
-      this->gamma3_ne[i] = new double[this->sizegamma3[1]];
-    }
-
-    this->sizeLC[0] = this->sizeL[0];
-    this->sizeLC[1] = this->sizeC[1];
-    this->LC = new fixedPoint *[this->sizeLC[0]];
-    this->LC_ne = new double *[this->sizeLC[0]];
-    for (int i = 0; i < this->sizeLC[1]; i++) {
-      this->LC[i] = new fixedPoint[this->sizeLC[1]];
-      this->LC_ne[i] = new double[this->sizeLC[1]];
-    }
-
-    this->LCB = new fixedPoint *[this->sizeLC[0]];
-    this->LCB_ne = new double *[this->sizeLC[0]];
-    for (int i = 0; i < this->sizeLC[0]; i++) {
-      this->LCB[i] = new fixedPoint[this->sizeB[1]];
-      this->LCB_ne[i] = new double[this->sizeB[1]];
-    }
-
-    this->sizegamma2[0] = this->sizegamma3[0];
-    this->sizegamma2[1] = this->sizeK[1];
-    this->gamma2 = new fixedPoint *[this->sizegamma2[0]];
-    this->gamma2_ne = new double *[this->sizegamma2[0]];
-    for (int i = 0; i < this->sizegamma2[0]; i++) {
-      this->gamma2[i] = new fixedPoint[this->sizegamma2[1]];
-      this->gamma2_ne[i] = new double[this->sizegamma2[1]];
-    }
-
-    this->sizegamma1[0] = this->sizeA[0];
-    this->sizegamma1[1] = this->sizeA[1];
-    this->gamma1 = new fixedPoint *[this->sizegamma1[0]];
-    this->gamma1_ne = new double *[this->sizegamma1[0]];
-    for (int i = 0; i < this->sizegamma1[0]; i++) {
-      this->gamma1[i] = new fixedPoint[this->sizegamma1[1]];
-      this->gamma1_ne[i] = new double[this->sizegamma1[1]];
-    }
-
-    this->LCA = new fixedPoint *[this->sizeA[0]];
-    this->LCA_ne = new double *[this->sizeA[1]];
-    for (int i = 0; i < this->sizeA[0]; i++) {
-      this->LCA[i] = new fixedPoint[this->sizeA[1]];
-      this->LCA_ne[i] = new double[this->sizeA[1]];
-    }
-
-    this->sizeA_BK[0] = this->sizeA[0];
-    this->sizeA_BK[1] = this->sizeA[1];
-    this->A_BK = new fixedPoint *[this->sizeA_BK[0]]; 
-    this->A_BK_ne = new double *[this->sizeA_BK[0]];
-    for (int i = 0; i < this->sizeA_BK[0]; i++) {
-      this->A_BK[i] = new fixedPoint[this->sizeA_BK[1]];
-      this->A_BK_ne[i] = new double[this->sizeA_BK[1]];
-    }
-
-    this->sizeBug[0] = this->sizeB[0];
-    this->sizeBug[1] = this->sizexk[1];
-    this->Bug = new fixedPoint *[this->sizeBug[0]];
-    this->Bug_ne = new double *[this->sizeBug[0]];
-    for (int i = 0; i < this->sizeB[0]; i++) {
-      this->Bug[i] = new fixedPoint[ this->sizeBug[1] ];
-      this->Bug_ne[i] = new double[ this->sizeBug[1] ];
-    }
-
   }
 };
 

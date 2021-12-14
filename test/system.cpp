@@ -74,6 +74,11 @@ int main(int argc, char **argv) {
   NetIO *io = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port);
   setup_semi_honest(io, party);
   bool print = 1;
+
+
+  // fixedPoint gamma3 = fixedPoint(-1, 24, 24, ALICE);
+  // gamma3 = gamma3.absolute_value();
+  // cout << gamma3.reveal<double>(ALICE) << endl;
  
   subSystem *subsystem = new subSystem();
   Cloud *cloud = new Cloud();
@@ -107,7 +112,7 @@ int main(int argc, char **argv) {
   }
   cout << endl;
   // Control loop
-  for (k = 0; k < 20; k++) {
+  for (k = 0; k < 2; k++) {
 
     if (k > 0){
       cloud->predict();

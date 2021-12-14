@@ -297,16 +297,13 @@ public:
     Bit zero(0, ALICE);                                      // Should we change this?
                                                              // Maybe this should be a parameter of the function
                                                              // cloud should learn nothing about this value
-    fixedPoint zeroFixed = fixedPoint(0, 24, 24, ALICE);     // Should we change this?
-                                                             // Maybe this should be a parameter of the function
-                                                             // cloud should learn nothing about this value
     for (int i = 0; i < this->sizexHatk[0]; i++) {
-      this->Cusum[i][0] = this->Cusum[i][0] + this->residues[i][0] - this->nu[i][0];
-      this->Cusum[i][0] = this->Cusum[i][0].toZero(this->alarm[i][0]);
-      clipBelow[i] = zeroFixed.operator>( this->Cusum[i][0] ); 
-      this->Cusum[i][0] = this->Cusum[i][0].toZero(clipBelow[i]);
       this->alarm[i][0] = zero;
       this->alarm[i][0] = this->Cusum[i][0].operator>(this->tau[i][0]);
+      this->Cusum[i][0] = this->Cusum[i][0] + this->residues[i][0] - this->nu[i][0];
+      this->Cusum[i][0] = this->Cusum[i][0].toZero(this->alarm[i][0]);
+      clipBelow[i] = !this->Cusum[i][0].isPositive(); 
+      this->Cusum[i][0] = this->Cusum[i][0].toZero(clipBelow[i]);
     }
   }
  

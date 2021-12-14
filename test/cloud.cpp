@@ -77,8 +77,9 @@ int main(int argc, char **argv) {
   bool print = 1;
 
   
-  
-  
+  // fixedPoint gamma3 = fixedPoint(-1, 24, 24, ALICE);
+  // gamma3 = gamma3.absolute_value();
+  // cout << gamma3.reveal<double>(ALICE) << endl;
   
 
   subSystem *subsystem = new subSystem();
@@ -112,7 +113,7 @@ int main(int argc, char **argv) {
 
   cout << endl;
   // Control loop
-  for (k = 0; k < 20; k++) {
+  for (k = 0; k < 2; k++) {
     if (k > 0){
       cloud->predict();
       cloud->computexHat(subsystem->zk);
