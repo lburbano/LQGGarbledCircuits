@@ -1,9 +1,6 @@
 # Encrypted-Control
 ## Setup
-Run the `setup.sh` script to install all library dependencies
-```
-$ ./setup.sh
-```
+This project requires the emp-toolkit. Please install the [Semihonest two party computation tool](https://github.com/emp-toolkit/emp-sh2pc).
 
 ## Building
 To build this project, follow the next steps:

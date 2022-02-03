@@ -16,4 +16,4 @@ install(FILES cmake/emp-sh2pc-config.cmake DESTINATION cmake/)
 install(DIRECTORY LQGGarbledCircuits DESTINATION include/)
 
 ENABLE_TESTING()
-ADD_SUBDIRECTORY(test)
+ADD_SUBDIRECTORY(main)

@@ -110,8 +110,8 @@ public:
     this->sizexgamma[0] = sizexr[0];
     this->sizexgamma[1] = sizexr[1];
     
-    this->uTilder = initSize_GC(this->uTilder, this->sizeuTilder);
-    this->xgamma = initSize_GC(this->xgamma, this->sizexgamma);
+    this->uTilder = initSize_GC( this->sizeuTilder);
+    this->xgamma = initSize_GC( this->sizexgamma);
     setZero_GC(this->uTilder, this->sizeuTilder, ALICE);
     setZero_GC(this->xgamma, this->sizexgamma, ALICE);
 
@@ -196,16 +196,16 @@ public:
   }
 
   // Auxiliary functions to load matrices.
-  fixedPoint** initSizeFile_GC(fixedPoint **in, string fileName, int *size){
+  fixedPoint** initSizeFile_GC( string fileName, int *size){
     getFileSize(fileName, size);
-    in = new fixedPoint *[ size[0] ];
+    fixedPoint **in = new fixedPoint *[ size[0] ];
     for( int i = 0; i < size[0]; i++ ){
       in[i] = new fixedPoint[ size[1] ];
     }
     return in;
   }
-  fixedPoint** initSize_GC(fixedPoint **in, int *size){
-    in = new fixedPoint *[ size[0] ];
+  fixedPoint** initSize_GC( int *size ){
+    fixedPoint **in = new fixedPoint *[ size[0] ];
     for( int i = 0; i < size[0]; i++ ){
       in[i] = new fixedPoint[ size[1] ];
     }
@@ -241,25 +241,25 @@ public:
     }
     */
     
-    this->A = initSizeFile_GC( this->A, "Data/A.txt", this->sizeA );
-    this->B = initSizeFile_GC( this->B, "Data/B.txt", this->sizeB );
-    this->C = initSizeFile_GC( this->C, "Data/C.txt", this->sizeC );
-    this->ur = initSizeFile_GC( this->ur, "Data/ur.txt", this->sizeur );
-    this->xr = initSizeFile_GC( this->xr, "Data/xr.txt", this->sizexr );
-    this->x0 = initSizeFile_GC( this->x0, "Data/x0.txt", this->sizex0 );
-    this->K = initSizeFile_GC( this->K, "Data/K.txt", this->sizeK );
-    this->L = initSizeFile_GC( this->L, "Data/L.txt", this->sizeL );
-    this->Nu = initSizeFile_GC( this->Nu, "Data/Nu.txt", this->sizeNu );
-    this->Tau = initSizeFile_GC( this->Tau, "Data/Tau.txt", this->sizeTau );
+    this->A = initSizeFile_GC( "Data/A.txt", this->sizeA );
+    this->B = initSizeFile_GC( "Data/B.txt", this->sizeB );
+    this->C = initSizeFile_GC( "Data/C.txt", this->sizeC );
+    this->ur = initSizeFile_GC( "Data/ur.txt", this->sizeur );
+    this->xr = initSizeFile_GC( "Data/xr.txt", this->sizexr );
+    this->x0 = initSizeFile_GC( "Data/x0.txt", this->sizex0 );
+    this->K = initSizeFile_GC( "Data/K.txt", this->sizeK );
+    this->L = initSizeFile_GC( "Data/L.txt", this->sizeL );
+    this->Nu = initSizeFile_GC( "Data/Nu.txt", this->sizeNu );
+    this->Tau = initSizeFile_GC( "Data/Tau.txt", this->sizeTau );
     
     
     this->sizezk[0] = this->sizeC[0];
     this->sizezk[1] = this->sizex0[1];
-    this->zk = initSize_GC( this->zk, this->sizezk );    
+    this->zk = initSize_GC( this->sizezk );    
     
     this->sizexk[0] = this->sizex0[0];
     this->sizexk[1] = this->sizex0[1];
-    this->xk = initSize_GC( this->xk, this->sizexk );
+    this->xk = initSize_GC( this->sizexk );
 
     setZero_GC(this->A, this->sizeA, ALICE);
     setZero_GC(this->B, this->sizeB, ALICE);
@@ -289,17 +289,17 @@ public:
     this->sizeBug[1] = this->sizexk[1];
 
 
-    this->gamma3 = initSize_GC( this->gamma3, this->sizegamma3 );
-    this->LC = initSize_GC( this->LC, this->sizeLC );    
+    this->gamma3 = initSize_GC( this->sizegamma3 );
+    this->LC = initSize_GC(  this->sizeLC );    
     this->LCB = new fixedPoint *[this->sizeLC[0]];
     for (int i = 0; i < this->sizeLC[0]; i++) {
       this->LCB[i] = new fixedPoint[this->sizeB[1]];
     }
-    this->gamma2 = initSize_GC( this->gamma2, this->sizegamma2 ); 
-    this->gamma1 = initSize_GC( this->gamma1, this->sizegamma1 ); 
-    this->LCA = initSize_GC( this->LCA, this->sizeA );     
-    this->A_BK = initSize_GC( this->A_BK, this->sizeA_BK );     
-    this->Bug = initSize_GC( this->Bug, this->sizeBug );
+    this->gamma2 = initSize_GC(  this->sizegamma2 ); 
+    this->gamma1 = initSize_GC( this->sizegamma1 ); 
+    this->LCA = initSize_GC( this->sizeA );     
+    this->A_BK = initSize_GC( this->sizeA_BK );     
+    this->Bug = initSize_GC( this->sizeBug );
   }
 
 };

@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
   }
   cout << endl;
   // Control loop
-  for (k = 0; k < 2; k++) {
+  for (k = 0; k < 10; k++) {
 
     if (k > 0){
       cloud->predict();
@@ -128,8 +128,9 @@ int main(int argc, char **argv) {
     if (print) {
       print_rest(cloud, subsystem, k+1);
     }
+    
   }
-
+  cout << "Finished" << endl;
   delete io;
   return 0;
 }

@@ -229,8 +229,8 @@ public:
   // Creates a representation of the constants related to references to be used with the emp toolkit
   // Assumes that constants are already computed in plaintext.
   void garbleReferenceConstants() {
-    this->uTilder = initSize_GC(this->uTilder, this->sizeuTilder);
-    this->xgamma = initSize_GC(this->xgamma, this->sizexgamma);
+    this->uTilder = initSize_GC( this->sizeuTilder );
+    this->xgamma = initSize_GC( this->sizexgamma );
     setData_GC( this->uTilder, this->uTilder_ne, this->sizeuTilder, ALICE);
     setData_GC( this->xgamma, this->xgamma_ne, this->sizexgamma, ALICE);
 
@@ -246,22 +246,22 @@ public:
   void inputData() {
     
     // Load matrix A
-    this->A_ne = initSizeFile(this->A_ne, "Data/A.txt", this->sizeA);
+    this->A_ne = initSizeFile( "Data/A.txt", this->sizeA);
     readFile(this->A_ne, "Data/A.txt", this->sizeA);
-    this->A = initSize_GC(this->A, this->sizeA);
+    this->A = initSize_GC(this->sizeA);
 
     // Load matrix B
-    this->B_ne = initSizeFile(this->B_ne, "Data/B.txt", this->sizeB);
+    this->B_ne = initSizeFile( "Data/B.txt", this->sizeB);
     readFile(this->B_ne, "Data/B.txt", this->sizeB);
-    this->B = initSize_GC(this->B, this->sizeB);
+    this->B = initSize_GC(this->sizeB);
 
     // Load matrix C
-    this->C_ne = initSizeFile(this->C_ne, "Data/C.txt", this->sizeC);
+    this->C_ne = initSizeFile( "Data/C.txt", this->sizeC);
     readFile(this->C_ne, "Data/C.txt", this->sizeC);
-    this->C = initSize_GC(this->C, this->sizeC);
+    this->C = initSize_GC(this->sizeC);
 
     // Load vector ur
-    this->ur_ne = initSizeFile(this->ur_ne, "Data/ur.txt", this->sizeur);
+    this->ur_ne = initSizeFile( "Data/ur.txt", this->sizeur);
     readFile(this->ur_ne, "Data/ur.txt", this->sizeur);
 
     // Initializa vector uk
@@ -270,46 +270,46 @@ public:
     this->uk_ne = initSize(this->uk_ne, this->sizeuk);
 
     // Load vector ur
-    this->ur = initSize_GC(this->ur, this->sizeur);
-    this->xr_ne = initSizeFile(this->xr_ne, "Data/xr.txt", this->sizexr);
+    this->ur = initSize_GC( this->sizeur );
+    this->xr_ne = initSizeFile( "Data/xr.txt", this->sizexr);
     readFile(this->xr_ne, "Data/xr.txt", this->sizexr);
-    this->xr = initSize_GC(this->xr, this->sizexr);
+    this->xr = initSize_GC( this->sizexr );
 
     // Load vector x0
-    this->x0_ne = initSizeFile(this->x0_ne, "Data/x0.txt", this->sizex0);
+    this->x0_ne = initSizeFile( "Data/x0.txt", this->sizex0);
     readFile(this->x0_ne, "Data/x0.txt", this->sizex0);
-    this->x0 = initSize_GC(this->x0, this->sizex0);
+    this->x0 = initSize_GC( this->sizex0 );
     
     // Load matrix K
-    this->K_ne = initSizeFile(this->K_ne, "Data/K.txt", this->sizeK);
+    this->K_ne = initSizeFile( "Data/K.txt", this->sizeK);
     readFile(this->K_ne, "Data/K.txt", this->sizeK);
-    this->K = initSize_GC(this->K, this->sizeK);
+    this->K = initSize_GC( this->sizeK );
 
     // Load matrix L
-    this->L_ne = initSizeFile(this->L_ne, "Data/L.txt", this->sizeL);
+    this->L_ne = initSizeFile( "Data/L.txt", this->sizeL);
     readFile(this->L_ne, "Data/L.txt", this->sizeL);
-    this->L = initSize_GC(this->L, this->sizeL);
+    this->L = initSize_GC( this->sizeL );
     
     // Load \nu
-    this->Nu_ne = initSizeFile(this->Nu_ne, "Data/Nu.txt", this->sizeNu);
+    this->Nu_ne = initSizeFile( "Data/Nu.txt", this->sizeNu);
     readFile(this->Nu_ne, "Data/Nu.txt", this->sizeNu);
-    this->Nu = initSize_GC(this->Nu, this->sizeNu);
+    this->Nu = initSize_GC( this->sizeNu );
 
 
     
-    this->Tau_ne = initSizeFile(this->Tau_ne, "Data/Tau.txt", this->sizeTau);
+    this->Tau_ne = initSizeFile( "Data/Tau.txt", this->sizeTau);
     readFile(this->Tau_ne, "Data/Tau.txt", this->sizeTau);
-    this->Tau = initSize_GC(this->Tau, this->sizeTau);
+    this->Tau = initSize_GC( this->sizeTau );
 
     // Load zk
     this->sizezk[0] = this->sizeC[0];
     this->sizezk[1] = this->sizex0[1];
-    this->zk = initSize_GC( this->zk, this->sizezk );
+    this->zk = initSize_GC( this->sizezk );
     this->zk_ne = initSize( this->zk_ne, this->sizezk );
     
     this->sizexk[0] = this->sizex0[0];
     this->sizexk[1] = this->sizex0[1];
-    this->xk = initSize_GC( this->xk, this->sizexk);
+    this->xk = initSize_GC( this->sizexk);
     this->xk_ne = initSize( this->xk_ne, this->sizexk);
     
     setData_GC( this->A, this->A_ne, this->sizeA, ALICE);
@@ -329,7 +329,7 @@ public:
     for (int i = 0; i < this->sizeK[0]; i++) {
       for (int j = 0; j < this->sizeK[1]; j++) {
         this->K_ne[i][j] = -this->K_ne[i][j];
-        this->K[i][j] = fixedPoint((this->K_ne[i][j]), decimalBits, integerBits, ALICE);
+        this->K[i][j] = fixedPoint( this->K_ne[i][j], decimalBits, integerBits, ALICE);
       }
     }
 
@@ -355,29 +355,29 @@ public:
     this->sizeLCB[0] = this->sizeLC[0];
     this->sizeLCB[1] = this->sizeB[1];
 
-    this->gamma3 = initSize_GC(this->gamma3, this->sizegamma3);
+    this->gamma3 = initSize_GC( this->sizegamma3 );
     this->gamma3_ne = initSize(this->gamma3_ne, this->sizegamma3);
 
-    this->LC = initSize_GC(this->LC, this->sizeLC);
+    this->LC = initSize_GC( this->sizeLC );
     this->LC_ne = initSize(this->LC_ne, this->sizeLC);
     
-    this->LCB = initSize_GC(this->LCB, this->sizeLCB);
+    this->LCB = initSize_GC( this->sizeLCB );
     this->LCB_ne = initSize(this->LCB_ne, this->sizeLCB);
 
-    this->gamma2 = initSize_GC(this->gamma2, this->sizegamma2);
-    this->gamma2_ne = initSize(this->gamma2_ne, this->sizegamma2);
+    this->gamma2 = initSize_GC( this->sizegamma2 );
+    this->gamma2_ne = initSize( this->gamma2_ne, this->sizegamma2);
     
-    this->gamma1 = initSize_GC(this->gamma1, this->sizegamma1);
-    this->gamma1_ne = initSize(this->gamma1_ne, this->sizegamma1);
+    this->gamma1 = initSize_GC( this->sizegamma1 );
+    this->gamma1_ne = initSize( this->gamma1_ne, this->sizegamma1);
 
-    this->LCA = initSize_GC(this->LCA, this->sizeA);
-    this->LCA_ne = initSize(this->LCA_ne, this->sizeA);
+    this->LCA = initSize_GC( this->sizeA );
+    this->LCA_ne = initSize( this->LCA_ne, this->sizeA);
 
-    this->A_BK = initSize_GC(this->A_BK, this->sizeA_BK);
-    this->A_BK_ne = initSize(this->A_BK_ne, this->sizeA_BK);
+    this->A_BK = initSize_GC( this->sizeA_BK );
+    this->A_BK_ne = initSize( this->A_BK_ne, this->sizeA_BK);
 
-    this->Bug = initSize_GC(this->Bug, this->sizeBug);
-    this->Bug_ne = initSize(this->Bug_ne, this->sizeBug);
+    this->Bug = initSize_GC( this->sizeBug );
+    this->Bug_ne = initSize( this->Bug_ne, this->sizeBug);
 
     
 
@@ -478,17 +478,17 @@ public:
   }
   
   // Initialize variables used for Garbled Circuits
-  fixedPoint** initSizeFile_GC(fixedPoint **in, string fileName, int *size){
+  fixedPoint** initSizeFile_GC( string fileName, int *size){
     getFileSize(fileName, size);
-    in = new fixedPoint *[ size[0] ];
+    fixedPoint **in = new fixedPoint *[ size[0] ];
     for( int i = 0; i < size[0]; i++ ){
       in[i] = new fixedPoint[ size[1] ];
     }
     return in;
   }
 
-  fixedPoint** initSize_GC(fixedPoint **in, int *size){
-    in = new fixedPoint *[ size[0] ];
+  fixedPoint** initSize_GC( int *size ){
+    fixedPoint **in = new fixedPoint *[ size[0] ];
     for( int i = 0; i < size[0]; i++ ){
       in[i] = new fixedPoint[ size[1] ];
     }
@@ -511,9 +511,9 @@ public:
     }
   }
   // Initialize matrices double
-  double** initSizeFile(double **in, string fileName, int *size){
+  double** initSizeFile( string fileName, int *size){
     getFileSize(fileName, size);
-    in = new double *[ size[0] ];
+    double **in = new double *[ size[0] ];
     for( int i = 0; i < size[0]; i++ ){
       in[i] = new double[ size[1] ];
     }
