@@ -63,7 +63,11 @@ void print_rest( Cloud *cloud, subSystem *subsystem, int k) {
   cout << endl << endl;
   cout << "Alarms: k=" << k << ":  " << endl;
   for (int i = 0; i < cloud->sizeyp[0]; i++) {
-    cout << cloud->alarm[i]->reveal(ALICE) << ", ";
+    if(cloud->HARD_CODE_ZEROES == 1){
+      cout << cloud->alarm_ne[i][0] << ", "; 
+    }else{
+     cout << cloud->alarm[i][0].reveal(PUBLIC) << ", "; 
+    }
     cout << endl;
   }
   cout << endl << endl;
@@ -113,7 +117,7 @@ int main(int argc, char **argv) {
 
   cout << endl;
   // Control loop
-  for (k = 0; k < 10; k++) {
+  for (k = 0; k < 2; k++) {
     if (k > 0){
       cloud->predict();
       cloud->computexHat(subsystem->zk);
@@ -121,13 +125,11 @@ int main(int argc, char **argv) {
     cloud->computeResidues(subsystem->zk);
     cloud->computeuk();
     cloud->computeCusum();
-
     subsystem->measureState(cloud->uk);
     subsystem->computezk();
-
-    if (print) {
+    if (print) 
       print_rest( cloud, subsystem, k+1);
-    }
+    cloud->reveal_alarm( PUBLIC );
     
   }
   cout << "Finished" << endl;

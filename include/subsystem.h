@@ -329,9 +329,9 @@ public:
     for (int i = 0; i < this->sizeK[0]; i++) {
       for (int j = 0; j < this->sizeK[1]; j++) {
         this->K_ne[i][j] = -this->K_ne[i][j];
-        this->K[i][j] = fixedPoint( this->K_ne[i][j], decimalBits, integerBits, ALICE);
       }
     }
+    setData_GC( this->K, this->K_ne, this->sizeK, ALICE);
 
     setData_GC( this->L, this->L_ne, this->sizeL, ALICE);
     setData_GC( this->Nu, this->Nu_ne, this->sizeNu, ALICE);
@@ -382,9 +382,11 @@ public:
     
 
   }
-  ///////////////////////////////////////////////////////////////////////////
-  // Functions required for the operations. Not focused on the control system
-  /////////////////////////////////////x//////////////////////////////////////
+  /*
+  -----------------------------------------------------------------------
+  Functions required for the operations. Not focused on the control system
+  -----------------------------------------------------------------------
+  */
 
   // Computes the multiplication between matrices A and B
   void matrixMul(fixedPoint **A, fixedPoint **B, fixedPoint **ret, int *ASize,

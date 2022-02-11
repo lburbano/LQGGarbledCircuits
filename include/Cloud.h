@@ -36,6 +36,14 @@ public:
   fixedPoint **residues;
   Bit **alarm;
 
+  int **alarm_ne;
+
+  int HARD_CODE_ZEROES;
+
+  int decimalBits = 24;
+  int integerBits = decimalBits;
+  int totalBits = decimalBits + integerBits;
+
   Cloud() {}
 
   // class receives matrices to compute the controller and the anomaly detection
@@ -46,6 +54,8 @@ public:
                  fixedPoint **Cusum, int *sizeCusum, fixedPoint **A_BK, int *sizeA_BK,
                  fixedPoint **Bug, int *sizeBug, fixedPoint **xr, int *sizexr, 
                  fixedPoint **ur, int *sizeur,fixedPoint **xk, int *sizexk) {
+    this->HARD_CODE_ZEROES = 1;
+
     this->sizeL[0] = sizeL[0];
     this->sizeL[1] = sizeL[1];
     this->L = new fixedPoint *[this->sizeL[0]];
@@ -222,14 +232,17 @@ public:
     
     
     this->alarm = new Bit *[this->sizeA_BK[0]];
+    this->alarm_ne = new int *[this->sizeA_BK[0]];
     for (int i = 0; i < this->sizeA_BK[0]; i++) {
       this->alarm[i] = new Bit[1];
+      this->alarm_ne[i] = new int[1];
     }
+    Bit zero(0, ALICE);
     for (int i = 0; i < this->sizeA_BK[0]; i++) {
-      Bit zero(0, ALICE);
       this->alarm[i][0] = zero;                               // Should we change this?
                                                               // Maybe this should be a parameter of the function
                                                               // cloud should learn nothing about this value
+      this->alarm_ne[i][0] = 0;
     }
   }
 
@@ -293,17 +306,38 @@ public:
 
   void computeCusum()//fixedPoint **xHat, fixedPoint **uk)
   {
-    Bit *clipBelow = new Bit[this->sizexHatk[0]]; 
+    Bit *clipBelow = new Bit[this->sizeCusum[0]]; 
     Bit zero(0, ALICE);                                      // Should we change this?
                                                              // Maybe this should be a parameter of the function
                                                              // cloud should learn nothing about this value
-    for (int i = 0; i < this->sizexHatk[0]; i++) {
-      this->alarm[i][0] = zero;
-      this->alarm[i][0] = this->Cusum[i][0].operator>(this->tau[i][0]);
-      this->Cusum[i][0] = this->Cusum[i][0] + this->residues[i][0] - this->nu[i][0];
-      this->Cusum[i][0] = this->Cusum[i][0].toZero(this->alarm[i][0]);
-      clipBelow[i] = !this->Cusum[i][0].isPositive(); 
-      this->Cusum[i][0] = this->Cusum[i][0].toZero(clipBelow[i]);
+    for (int i = 0; i < this->sizeCusum[0]; i++) {
+      
+      if(this->HARD_CODE_ZEROES == 1){
+        if(this->alarm_ne[i][0] == 1){
+          this->Cusum[i][0] = fixedPoint(0, this->decimalBits, this->integerBits, ALICE);
+        } else{
+          this->Cusum[i][0] = this->Cusum[i][0] + this->residues[i][0] - this->nu[i][0];
+          clipBelow[i] = !this->Cusum[i][0].isPositive(); 
+          this->Cusum[i][0] = this->Cusum[i][0].toZero(clipBelow[i]);
+          this->alarm[i][0] = zero;
+          this->alarm[i][0] = this->Cusum[i][0].operator>(this->tau[i][0]);
+        }
+
+      } else{
+        this->Cusum[i][0] = this->Cusum[i][0] + this->residues[i][0] - this->nu[i][0];
+        this->Cusum[i][0] = this->Cusum[i][0].toZero(this->alarm[i][0]);
+        clipBelow[i] = !this->Cusum[i][0].isPositive(); 
+        this->Cusum[i][0] = this->Cusum[i][0].toZero(clipBelow[i]);
+        this->alarm[i][0] = zero;
+        this->alarm[i][0] = this->Cusum[i][0].operator>(this->tau[i][0]);
+      }
+      
+      
+    }
+  }
+  void reveal_alarm(int party){
+    for (int i = 0; i < this->sizeCusum[0]; i++) {
+      this->alarm_ne[i][0] = this->alarm[i][0].reveal(party);
     }
   }
  
