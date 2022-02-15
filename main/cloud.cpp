@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
 
   cout << endl;
   // Control loop
-  for (k = 0; k < 2; k++) {
+  for (k = 0; k < 10; k++) {
     if (k > 0){
       cloud->predict();
       cloud->computexHat(subsystem->zk);

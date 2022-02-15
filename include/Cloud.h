@@ -2,8 +2,9 @@
 #ifndef CLOUD_H
 #define CLOUD_H
 #include "fixedPoint.h"
+#include "utility_functions.h"
 
-class Cloud {
+class Cloud: public utility_functions {
 public:
   fixedPoint **gamma1;
   int sizegamma1[2];
@@ -40,9 +41,7 @@ public:
 
   int HARD_CODE_ZEROES;
 
-  int decimalBits = 24;
-  int integerBits = decimalBits;
-  int totalBits = decimalBits + integerBits;
+  
 
   Cloud() {}
 
@@ -164,7 +163,7 @@ public:
     }
     for (int i = 0; i < this->sizeCusum[0]; i++) {
       for (int j = 0; j < this->sizeCusum[1]; j++) {
-        this->Cusum[i][j] = fixedPoint(0, 24, 24, ALICE);
+        this->Cusum[i][j] = fixedPoint(0, decimalBits, integerBits, ALICE);
       }
     }
 
@@ -212,7 +211,7 @@ public:
     }
     for (int i = 0; i < this->sizeresidues[0]; i++) {
       for (int j = 0; j < this->sizeresidues[1]; j++) {
-        this->residues[i][j] = fixedPoint(0, 24, 24, ALICE); // Should we change this?
+        this->residues[i][j] = fixedPoint(0, decimalBits, integerBits, ALICE); // Should we change this?
                                                              // Maybe this should be a parameter of the function
                                                              // cloud should learn nothing about this value
       }
@@ -226,7 +225,7 @@ public:
     }
     for (int i = 0; i < this->sizeuk[0]; i++) {
       for (int j = 0; j < this->sizeuk[1]; j++) {
-        this->uk[i][j] = fixedPoint(0, 24, 24, ALICE);      
+        this->uk[i][j] = fixedPoint(0, decimalBits, integerBits, ALICE);      
       }
     } 
     
@@ -246,30 +245,7 @@ public:
     }
   }
 
-  // Computes the multiplication between matrices A and B
-  void matrixMul(fixedPoint **A, fixedPoint **B, fixedPoint **ret, int *ASize,
-                 int *BSize) {
-    fixedPoint zero(0, 24, 24, PUBLIC);
-    for (int i = 0; i < ASize[0]; i++) {
-      for (int j = 0; j < BSize[1]; j++) {
-        ret[i][j] = (A[i][0] * B[0][j]);
-        for (int k = 1; k < ASize[1]; k++) {
-          ret[i][j] = ret[i][j] + (A[i][k] * B[k][j]);
-        }
-      }
-    }
-  }
-
-  void matrixVecMul(fixedPoint **A, fixedPoint **B, fixedPoint *ret,
-                    int *size) {
-    fixedPoint zero(0, 24, 24, PUBLIC);
-    for (int i = 0; i < size[0]; i++) {
-      ret[i] = ((A[i][0]) * (B[0][0]));
-      for (int j = 1; j < size[1]; j++) {
-        ret[i] = ret[i] + ((A[i][j]) * (B[j][0]));
-      }
-    }
-  }
+  
 
 
   // Compute estimate xHat
@@ -298,8 +274,8 @@ public:
   void computeResidues(fixedPoint **zk){
     for (int i = 0; i < this->sizegamma1[0]; i++) {
       this->residues[i][0] = this->yp[i][0]-zk[i][0]; 
-      this->residues[i][0] = this->residues[i][0] * this->residues[i][0]; // For square
-      // this->residues[i][0] = this->residues[i][0].absolute_value(); // For absolute value
+      // this->residues[i][0] = this->residues[i][0] * this->residues[i][0]; // For square
+      this->residues[i][0] = this->residues[i][0].absolute_value(); // For absolute value
       // cout << this->residues[i][0].reveal<double>(ALICE)<<endl;
     }
   }

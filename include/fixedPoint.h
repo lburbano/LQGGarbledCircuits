@@ -20,15 +20,15 @@ public:
   Bit *bits;
   // Integer val;
   int length = 0;
-  int decimalBits = 24;
+  int decimalBits = 20;
   int totalBits = 2*decimalBits;
   int party;
 
   // Class initializer
-  fixedPoint(double input, int fractLen, int intLen, int party = PUBLIC) {
+  fixedPoint(double input, int fractLen, int intLen, int partyIn = PUBLIC) {
     length = fractLen + intLen;
     bits = new Bit[length];
-    party = party;
+    party = partyIn;
     to_binary(input, bits, length, party);
   }
 
@@ -53,11 +53,8 @@ public:
     string str, bin;
     int temp = 0;
     str = to_string(num);
-
-    if (num >= 0)
-      bin = std::bitset<24>(abs(num)).to_string();
-    else
-      bin = std::bitset<24>(1 * pow(2, decimalBits) + num).to_string();
+    bin = std::bitset<20>(num).to_string();
+    
     reverse(bin.begin(), bin.end());
     int l = (bin.size() > (size_t)len ? len : bin.size());
     for (int i = temp; i < l + temp; ++i)
@@ -172,12 +169,12 @@ public:
     fixedPoint v2 = -(*this);
     fixedPoint res(*this);
     s = res.isPositive();
-    _abs(this->bits,v2.bits, !s, res.bits, 48);
+    _abs(this->bits,v2.bits, !s, res.bits, totalBits);
     return res;
   }
 
   Bit isPositive(){
-    return !this->bits[47];
+    return !this->bits[totalBits-1];
   }
 
   // Circuit to determine if a>b
