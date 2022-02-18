@@ -90,9 +90,14 @@ int main(int argc, char **argv) {
   Cloud *cloud = new Cloud();
 
   // client offline
-  subsystem->inputData();
-  subsystem->garbleConstants();
-  subsystem->garbleReferenceConstants();
+  int cloud_load_data = 1;
+  subsystem->inputData( cloud_load_data );
+  if(cloud_load_data == 1){
+    subsystem->computeControlConstants();
+    subsystem->computeReferenceConstants();
+  }
+  subsystem->garbleConstants( cloud_load_data );
+  subsystem->garbleReferenceConstants( cloud_load_data );
 
   // cloud offline
   cloud->getInputs(subsystem->L, subsystem->sizeL, subsystem->K, subsystem->sizeK,
@@ -102,7 +107,7 @@ int main(int argc, char **argv) {
                    subsystem->sizeTau, subsystem->Cusum, subsystem->sizeCusum,
                    subsystem->A_BK, subsystem->sizeA_BK, subsystem->Bug, subsystem->sizeBug, //maybe changed
                    subsystem->xr, subsystem->sizexr, subsystem->ur,
-                   subsystem->sizeur, subsystem->x0, subsystem->sizex0);
+                   subsystem->sizeur, subsystem->xk, subsystem->sizexk);
 
   // cloud->computeConstants();
 

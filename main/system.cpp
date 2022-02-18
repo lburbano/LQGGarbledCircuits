@@ -87,16 +87,20 @@ int main(int argc, char **argv) {
   subSystem *subsystem = new subSystem();
   Cloud *cloud = new Cloud();
 
+  int system_load_data = 0;
   // Loads data related to controller and system
-  subsystem->inputData();
+  subsystem->inputData( system_load_data );
 
   // Computes controller matrices 
-  subsystem->computeControlConstants();
-  subsystem->garbleControlConstants();
+  if(system_load_data == 1){
+    subsystem->computeControlConstants();
+    subsystem->computeReferenceConstants();
+  }
+  subsystem->garbleControlConstants( system_load_data );
 
   // Computes reference related constants
-  subsystem->computeReferenceConstants();
-  subsystem->garbleReferenceConstants();
+  
+  subsystem->garbleReferenceConstants( system_load_data );
 
   // cloud offline
   cloud->getInputs(subsystem->L, subsystem->sizeL, subsystem->K, subsystem->sizeK,
@@ -106,7 +110,7 @@ int main(int argc, char **argv) {
                    subsystem->sizeTau, subsystem->Cusum, subsystem->sizeCusum,
                    subsystem->A_BK, subsystem->sizeA_BK, subsystem->Bug, subsystem->sizeBug, //maybe changed
                    subsystem->xr, subsystem->sizexr, subsystem->ur,
-                   subsystem->sizeur, subsystem->x0, subsystem->sizex0);
+                   subsystem->sizeur, subsystem->xk, subsystem->sizexk);
  
 
   int k = 0;

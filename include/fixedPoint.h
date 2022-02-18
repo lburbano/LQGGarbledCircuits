@@ -107,7 +107,7 @@ public:
     }
   }
 
-  // takes a number and set it to zero if s=1
+  // takes a number and sets it to zero if s=1
   fixedPoint toZero(Bit s)
   {
     fixedPoint ret(*this);

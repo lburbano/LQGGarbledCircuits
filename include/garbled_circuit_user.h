@@ -1,14 +1,14 @@
-#ifndef UTITILITYFUNCTIONS_H
-#define UTITILITYFUNCTIONS_H
+#ifndef GARBLEDCIRCUITUSER_H
+#define GARBLEDCIRCUITUSER_H
 #include "fixedPoint.h"
-class utility_functions{
+class garbled_circuit_user{
     public:
       int decimalBits = 20;
       int integerBits = decimalBits;
       int totalBits = decimalBits + integerBits;
     // Computes the multiplication between matrices A and B
 
-  utility_functions() {}
+  garbled_circuit_user() {}
   void matrixMul(fixedPoint **A, fixedPoint **B, fixedPoint **ret, int *ASize,
                  int *BSize) {
     for (int i = 0; i < ASize[0]; i++) {
@@ -100,7 +100,7 @@ class utility_functions{
   }
   
   // Initialize variables used for Garbled Circuits
-  fixedPoint** initSizeFile_GC( string fileName, int *size){
+  fixedPoint** init_size_using_file_GC( string fileName, int *size){
     getFileSize(fileName, size);
     fixedPoint **in = new fixedPoint *[ size[0] ];
     for( int i = 0; i < size[0]; i++ ){
@@ -133,7 +133,7 @@ class utility_functions{
     }
   }
   // Initialize matrices double
-  double** initSizeFile( string fileName, int *size){
+  double** init_size_file( string fileName, int *size){
     getFileSize(fileName, size);
     double **in = new double *[ size[0] ];
     for( int i = 0; i < size[0]; i++ ){
@@ -142,8 +142,8 @@ class utility_functions{
     return in;
   }
 
-  double** initSize(double **in, int *size){
-    in = new double *[ size[0] ];
+  double** init_size(int *size){
+    double **in = new double *[ size[0] ];
     for( int i = 0; i < size[0]; i++ ){
       in[i] = new double[ size[1] ];
     }

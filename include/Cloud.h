@@ -2,9 +2,9 @@
 #ifndef CLOUD_H
 #define CLOUD_H
 #include "fixedPoint.h"
-#include "utility_functions.h"
+#include "garbled_circuit_user.h"
 
-class Cloud: public utility_functions {
+class Cloud: public garbled_circuit_user {
 public:
   fixedPoint **gamma1;
   int sizegamma1[2];
@@ -203,7 +203,7 @@ public:
       }
     }
 
-    this->sizeresidues[0] = sizeA_BK[0];
+    this->sizeresidues[0] = sizexk[0];
     this->sizeresidues[1] = sizexk[1];
     this->residues = new fixedPoint *[this->sizeresidues[0]];
     for (int i = 0; i < this->sizeresidues[0]; i++) {

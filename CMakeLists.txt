@@ -9,7 +9,7 @@ find_package(emp-ot REQUIRED)
 include_directories(${EMP-OT_INCLUDE_DIRS})
 include_directories(include)
 
-file(COPY ${CMAKE_SOURCE_DIR}/Data DESTINATION ./)
+# file(COPY ${CMAKE_SOURCE_DIR}/Data DESTINATION ./)
 
 # Installation
 install(FILES cmake/emp-sh2pc-config.cmake DESTINATION cmake/)
