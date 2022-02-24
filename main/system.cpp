@@ -80,9 +80,10 @@ int main(int argc, char **argv) {
   bool print = 1;
 
 
-  // fixedPoint gamma3 = fixedPoint(-1, 24, 24, ALICE);
-  // gamma3 = gamma3.absolute_value();
-  // cout << gamma3.reveal<double>(ALICE) << endl;
+  fixedPoint gamma3 = fixedPoint(0, 2, 2, BOB);
+  gamma3 = gamma3.absolute_value();
+  cout << gamma3.reveal<double>(ALICE) << endl;
+ 
  
   subSystem *subsystem = new subSystem();
   Cloud *cloud = new Cloud();
@@ -94,13 +95,14 @@ int main(int argc, char **argv) {
   // Computes controller matrices 
   if(system_load_data == 1){
     subsystem->computeControlConstants();
-    subsystem->computeReferenceConstants();
   }
   subsystem->garbleControlConstants( system_load_data );
+  subsystem->computeReferenceConstants();
+  
 
   // Computes reference related constants
   
-  subsystem->garbleReferenceConstants( system_load_data );
+  
 
   // cloud offline
   cloud->getInputs(subsystem->L, subsystem->sizeL, subsystem->K, subsystem->sizeK,
@@ -126,8 +128,8 @@ int main(int argc, char **argv) {
       cloud->predict();
       cloud->computexHat(subsystem->zk);
     }
-    cloud->computeResidues(subsystem->zk);
     cloud->computeuk();
+    cloud->computeResidues(subsystem->zk);
     cloud->computeCusum();
     subsystem->measureState(cloud->uk);
     subsystem->computezk();
@@ -137,6 +139,7 @@ int main(int argc, char **argv) {
     
   }
   cout << "Finished" << endl;
+  
   delete io;
   return 0;
 }

@@ -291,19 +291,20 @@ public:
       if(this->HARD_CODE_ZEROES == 1){
         if(this->alarm_ne[i][0] == 1){
           this->Cusum[i][0] = fixedPoint(0, this->decimalBits, this->integerBits, ALICE);
+          this->alarm[i][0] = zero;
         } else{
           this->Cusum[i][0] = this->Cusum[i][0] + this->residues[i][0] - this->nu[i][0];
-          clipBelow[i] = !this->Cusum[i][0].isPositive(); 
-          this->Cusum[i][0] = this->Cusum[i][0].toZero(clipBelow[i]);
+          clipBelow[i] = this->Cusum[i][0].isPositive(); 
+          this->Cusum[i][0] = this->Cusum[i][0].reset(clipBelow[i]);
           this->alarm[i][0] = zero;
           this->alarm[i][0] = this->Cusum[i][0].operator>(this->tau[i][0]);
         }
 
       } else{
         this->Cusum[i][0] = this->Cusum[i][0] + this->residues[i][0] - this->nu[i][0];
-        this->Cusum[i][0] = this->Cusum[i][0].toZero(this->alarm[i][0]);
-        clipBelow[i] = !this->Cusum[i][0].isPositive(); 
-        this->Cusum[i][0] = this->Cusum[i][0].toZero(clipBelow[i]);
+        this->Cusum[i][0] = this->Cusum[i][0].reset(this->alarm[i][0]);
+        clipBelow[i] = this->Cusum[i][0].isPositive(); 
+        this->Cusum[i][0] = this->Cusum[i][0].reset(clipBelow[i]);
         this->alarm[i][0] = zero;
         this->alarm[i][0] = this->Cusum[i][0].operator>(this->tau[i][0]);
       }

@@ -20,7 +20,7 @@ public:
   Bit *bits;
   // Integer val;
   int length = 0;
-  int decimalBits = 20;
+  int decimalBits = 2;
   int totalBits = 2*decimalBits;
   int party;
 
@@ -53,7 +53,7 @@ public:
     string str, bin;
     int temp = 0;
     str = to_string(num);
-    bin = std::bitset<20>(num).to_string();
+    bin = std::bitset<2>(num).to_string();
     
     reverse(bin.begin(), bin.end());
     int l = (bin.size() > (size_t)len ? len : bin.size());
@@ -99,19 +99,18 @@ public:
   }
   
   // takes a number and set it to zero if s=1
-  void _toZero(Bit *x, Bit s, Bit *result, int size)
+  void _reset(Bit *x, Bit s, Bit *result, int size)
   {
-    s = !s;
     for (int i = 0; i < size ; i++) {
       result[i] = x[i] & s;
     }
   }
 
   // takes a number and sets it to zero if s=1
-  fixedPoint toZero(Bit s)
+  fixedPoint reset(Bit s)
   {
     fixedPoint ret(*this);
-    _toZero(this->bits, s, ret.bits,  totalBits);
+    _reset(this->bits, s, ret.bits,  totalBits);
     return ret;
   }
 

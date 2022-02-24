@@ -171,13 +171,12 @@ public:
   // Assumes that the constants are already computed in plaintext
   void garbleControlConstants( int load_data ) {
     // gamma3
-    if(load_data == 1){
-      setData_GC(this->gamma1, this->gamma1_ne, this->sizegamma1, ALICE);
-      setData_GC(this->A_BK, this->A_BK_ne, this->sizeA, ALICE);
-    } else{
-      setZero_GC( this->gamma1, this->sizegamma1, BOB);
-      setZero_GC( this->A_BK, this->sizeA_BK, BOB );
-    }
+    
+    setZero_GC( this->gamma1, this->sizegamma1, BOB);
+    setZero_GC( this->gamma2, this->sizegamma2, BOB);
+    setZero_GC( this->gamma3, this->sizegamma3, BOB);
+    setZero_GC( this->A_BK, this->sizeA_BK, BOB );
+    
     
   }
 
@@ -187,45 +186,41 @@ public:
   void computeReferenceConstants() {
     this->sizeuTilder[0] = sizeur[0];
     this->sizeuTilder[1] = sizeur[1];
-    this->sizexgamma[0] = sizexk[0];
-    this->sizexgamma[1] = sizexk[1];
+    this->sizexgamma[0] = sizexr[0];
+    this->sizexgamma[1] = sizexr[1];
 
-    this->uTilder_ne = init_size( this->sizeuTilder );
-    this->xgamma_ne = init_size( this->sizexgamma );
+    this->uTilder = initSize_GC( this->sizeuTilder );
+    this->xgamma  = initSize_GC( this->sizexgamma );
     
 
-    double **Kxr_ne = new double *[this->sizeK[0]];
+    fixedPoint **Kxr = new fixedPoint *[this->sizeK[0]];
     for (int i = 0; i < this->sizeK[0]; i++) {
-      Kxr_ne[i] = new double[this->sizexr[1]];
+      Kxr[i] = new fixedPoint[this->sizexr[1]];
     } 
-    matrixMulNE(this->K_ne, this->xr_ne, Kxr_ne, this->sizeK, this->sizexr);
+    matrixMul(this->K, this->xr, Kxr, this->sizeK, this->sizexr);
     for (int i = 0; i < this->sizeuTilder[0]; i++) {
       for (int j = 0; j < this->sizeuTilder[1]; j++) {
-        this->uTilder_ne[i][j] = this->ur_ne[i][j] + Kxr_ne[i][j];
+        this->uTilder[i][j] = this->ur[i][j] + Kxr[i][j];
       }
     }
-    double **gamma2xr = new double *[this->sizegamma2[0]];
+    fixedPoint **gamma2xr = new fixedPoint *[this->sizegamma2[0]];
     for (int i = 0; i < this->sizegamma2[0]; i++) {
-      gamma2xr[i] = new double[this->sizexr[1]];
+      gamma2xr[i] = new fixedPoint[this->sizexr[1]];
     }
-    double **gamma3ur = new double *[this->sizegamma3[0]];
+    fixedPoint **gamma3ur = new fixedPoint *[this->sizegamma3[0]];
     for (int i = 0; i < this->sizegamma3[0]; i++) {
-      gamma3ur[i] = new double[this->sizeur[1]];
+      gamma3ur[i] = new fixedPoint[this->sizeur[1]];
     }
 
-    matrixMulNE(this->gamma2_ne, this->xr_ne, gamma2xr, this->sizegamma2, this->sizexr);
-    matrixMulNE(this->gamma3_ne, this->ur_ne, gamma3ur, this->sizegamma3, this->sizeur);
+    matrixMul(this->gamma2, this->xr, gamma2xr, this->sizegamma2, this->sizexr);
+    matrixMul(this->gamma3, this->ur, gamma3ur, this->sizegamma3, this->sizeur);
     for (int i = 0; i < this->sizexgamma[0]; i++) {
       for (int j = 0; j < this->sizexgamma[1]; j++) {
-        this->xgamma_ne[i][j] = gamma3ur[i][j] + gamma2xr[i][j];
+        this->xgamma[i][j] = gamma3ur[i][j] + gamma2xr[i][j];
       }
     }
-
-
     // compute B u_{\Gamma}
-    matrixMulNE(this->B_ne, this->uTilder_ne, this->Bug_ne, this->sizeB, this->sizeuTilder);
-    
-    
+    matrixMul(this->B, this->uTilder, this->Bug, this->sizeB, this->sizeuTilder);
   }
 
   // Creates a representation of the constants related to references to be used with the emp toolkit
@@ -239,25 +234,16 @@ public:
     this->uTilder = initSize_GC( this->sizeuTilder );
     this->xgamma = initSize_GC( this->sizexgamma );
 
-    if(load_data == 1){
-      setData_GC( this->uTilder, this->uTilder_ne, this->sizeuTilder, ALICE);
-      setData_GC( this->xgamma, this->xgamma_ne, this->sizexgamma, ALICE);
+    
+    setZero_GC( this->uTilder, this->sizeuTilder, BOB);
+    setZero_GC( this->xgamma,  this->sizexgamma, BOB);
 
-      for (int i = 0; i < this->sizeB[0]; i++) {
-        for (int j = 0; j < this->sizexk[1]; j++) {
-          this->Bug[i][j] = fixedPoint(this->Bug_ne[i][j], decimalBits, integerBits, ALICE);
-        }
-      }
-    } else{
-      setZero_GC( this->uTilder, this->sizeuTilder, BOB);
-      setZero_GC( this->xgamma,  this->sizexgamma, BOB);
-
-      for (int i = 0; i < this->sizeB[0]; i++) {
-        for (int j = 0; j < this->sizexk[1]; j++) {
-          this->Bug[i][j] = fixedPoint(0, decimalBits, integerBits, BOB);
-        }
+    for (int i = 0; i < this->sizeB[0]; i++) {
+      for (int j = 0; j < this->sizexk[1]; j++) {
+        this->Bug[i][j] = fixedPoint(0, decimalBits, integerBits, BOB);
       }
     }
+    
     
 
   }  
@@ -265,76 +251,61 @@ public:
   // and to simulate the system behavior
   void inputData(int load_data) {
     string data_folder = "Data/";
-    // Load system matrices A, B, C
-    this->A_ne  = init_size_file( data_folder + "A.txt", this->sizeA);
-    this->B_ne  = init_size_file( data_folder + "B.txt", this->sizeB);
-    this->C_ne  = init_size_file( data_folder + "C.txt", this->sizeC);    
-    this->xk_ne = init_size_file( data_folder + "x0.txt", this->sizexk);
-    this->zk_ne = init_size_file( data_folder + "x0.txt", this->sizezk);
+    // Initializes matrices A, B, C, x0, y0, xr, ur, tau, nu
+    this->A_ne   = init_size_file( data_folder + "A.txt", this->sizeA);
+    this->B_ne   = init_size_file( data_folder + "B.txt", this->sizeB);
+    this->C_ne   = init_size_file( data_folder + "C.txt", this->sizeC);    
+    this->xk_ne  = init_size_file( data_folder + "x0.txt", this->sizexk);
+    this->zk_ne  = init_size_file( data_folder + "x0.txt", this->sizezk);
+    this->ur_ne  = init_size_file( data_folder + "ur.txt", this->sizeur);
+    this->xr_ne  = init_size_file( data_folder + "xr.txt", this->sizexr);
+    this->Tau_ne = init_size_file( data_folder + "Tau.txt", this->sizeTau);
+    this->Nu_ne  = init_size_file( data_folder + "Nu.txt", this->sizeNu);
 
+    // Load data of matrices A, B, C, x0, y0, xr, ur, tau, nu
     readFile(this->A_ne, data_folder + "A.txt", this->sizeA);
     readFile(this->B_ne, data_folder + "B.txt", this->sizeB);
     readFile(this->C_ne, data_folder + "C.txt", this->sizeC);
     readFile(this->xk_ne, data_folder + "x0.txt", this->sizexk);
     readFile(this->zk_ne, data_folder + "x0.txt", this->sizezk);
+    readFile(this->ur_ne, data_folder + "ur.txt", this->sizeur);
+    readFile(this->xr_ne, data_folder + "xr.txt", this->sizexr);
+    readFile(this->Tau_ne, data_folder + "Tau.txt", this->sizeTau);
+    readFile(this->Nu_ne, data_folder + "Nu.txt", this->sizeNu);
 
     // this->sizezk[0] = this->sizeC[0];
     // this->sizezk[1] = this->sizexk[1];
     
-
-    this->zk  = initSize_GC( this->sizezk );
+    // Initializes as fixedPoint System's secrets
+    this->ur  = initSize_GC( this->sizeur );
+    this->xr  = initSize_GC( this->sizexr );
     this->xk  = initSize_GC( this->sizexk );
+    this->Nu  = initSize_GC( this->sizeNu );
+    this->Tau = initSize_GC( this->sizeTau );
+    this->zk  = initSize_GC( this->sizezk );
     
-    if(load_data == 1){
-      // Load matrices sizes
-      this->ur_ne  = init_size_file( data_folder + "ur.txt", this->sizeur);
-      this->xr_ne  = init_size_file( data_folder + "xr.txt", this->sizexr);
-      this->K_ne   = init_size_file( data_folder + "K.txt", this->sizeK);
-      this->L_ne   = init_size_file( data_folder + "L.txt", this->sizeL);
-      this->Nu_ne  = init_size_file( data_folder + "Nu.txt", this->sizeNu);
-      this->Tau_ne = init_size_file( data_folder + "Tau.txt", this->sizeTau);
-
-      // Load matrices info
-      readFile(this->ur_ne, data_folder + "ur.txt", this->sizeur);
-      readFile(this->xr_ne, data_folder + "xr.txt", this->sizexr);
-      readFile(this->K_ne, data_folder + "K.txt", this->sizeK);
-      readFile(this->L_ne, data_folder + "L.txt", this->sizeL);
-      readFile(this->Nu_ne, data_folder + "Nu.txt", this->sizeNu);
-      readFile(this->Tau_ne, data_folder + "Tau.txt", this->sizeTau);
-
-      // Initialize matrices as fixedPoint
-      this->ur  = initSize_GC( this->sizeur );
-      this->xr  = initSize_GC( this->sizexr );
-      this->K   = initSize_GC( this->sizeK );
-      this->L   = initSize_GC( this->sizeL );
-      this->Nu  = initSize_GC( this->sizeNu );
-      this->Tau = initSize_GC( this->sizeTau );
-      
-
-      // Set data into matrices type fixedPoint
-      for (int i = 0; i < this->sizeK[0]; i++) 
-        for (int j = 0; j < this->sizeK[1]; j++) 
-          this->K_ne[i][j] = -this->K_ne[i][j];
-      setData_GC( this->K, this->K_ne, this->sizeK, ALICE);
-      setData_GC( this->L, this->L_ne, this->sizeL, ALICE);
-      setData_GC( this->Nu, this->Nu_ne, this->sizeNu, ALICE);
-      setData_GC( this->Tau, this->Tau_ne, this->sizeTau, ALICE);
-    }else{
-      this->K   = init_size_using_file_GC(data_folder + "K.txt", this->sizeK);
-      this->L   = init_size_using_file_GC(data_folder + "L.txt", this->sizeL);
-      this->Nu  = init_size_using_file_GC(data_folder + "Nu.txt", this->sizeNu);
-      this->Tau = init_size_using_file_GC(data_folder + "Tau.txt", this->sizeTau);
-      getFileSize( data_folder + "ur.txt", this->sizeur);
-
-      setZero_GC( this->K, this->sizeK, BOB);
-      setZero_GC( this->L, this->sizeL, BOB);
-      setZero_GC( this->Nu, this->sizeNu, BOB);
-      setZero_GC( this->Tau,  this->sizeTau, BOB);
-    }
+    // Initializes as fixedPoint cloud's secrets
+    this->K   = init_size_using_file_GC(data_folder + "K.txt", this->sizeK);
+    this->L   = init_size_using_file_GC(data_folder + "L.txt", this->sizeL);
+    this->B   = initSize_GC( this->sizeB );
+    
+    
+    
+    // Puts data to cloud's secrets
+    setZero_GC( this->K, this->sizeK, BOB);
+    setZero_GC( this->L, this->sizeL, BOB);
+    setZero_GC( this->B, this->sizeB, BOB);
+    
+    
     this->sizeuk[0] = this->sizeur[0];
     this->sizeuk[1] = this->sizeur[1];
+    // Puts data into system's secrets
     setData_GC( this->zk, this->xk_ne, this->sizezk, ALICE);  
     setData_GC( this->xk, this->xk_ne, this->sizezk, ALICE);
+    setData_GC( this->xr, this->xr_ne, this->sizexr, ALICE);
+    setData_GC( this->ur, this->ur_ne, this->sizeur, ALICE);
+    setData_GC( this->Nu, this->Nu_ne, this->sizeNu, ALICE);
+    setData_GC( this->Tau, this->Tau_ne, this->sizeTau, ALICE);
     this->uk_ne  = init_size( this->sizeur );
 
 
@@ -353,17 +324,10 @@ public:
     this->sizeLCB[0] = this->sizeLC[0];
     this->sizeLCB[1] = this->sizeB[1];
 
-    if(load_data == 1){
-      this->gamma3_ne = init_size( this->sizegamma3 );
-      this->LC_ne = init_size( this->sizeLC );
-      this->LCB_ne = init_size( this->sizeLCB );
-      this->gamma2_ne = init_size( this->sizegamma2 );
-      this->gamma1_ne = init_size( this->sizegamma1 );
-      this->LCA_ne = init_size( this->sizeA);
-      this->A_BK_ne = init_size( this->sizeA_BK );
-      this->Bug_ne = init_size( this->sizeBug );
-    } 
+    
     this->gamma1 = initSize_GC( this->sizegamma1 );
+    this->gamma2 = initSize_GC( this->sizegamma2 );
+    this->gamma3 = initSize_GC( this->sizegamma3 );
     this->Bug    = initSize_GC( this->sizeBug );
     this->A_BK   = initSize_GC( this->sizeA_BK );
 
