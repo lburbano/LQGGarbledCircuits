@@ -80,9 +80,9 @@ int main(int argc, char **argv) {
   bool print = 1;
 
 
-  fixedPoint gamma3 = fixedPoint(0, 2, 2, BOB);
-  gamma3 = gamma3.absolute_value();
-  cout << gamma3.reveal<double>(ALICE) << endl;
+  // fixedPoint gamma3 = fixedPoint(0, 2, 2, BOB);
+  // gamma3 = gamma3.absolute_value();
+  // cout << gamma3.reveal<double>(ALICE) << endl;
  
  
   subSystem *subsystem = new subSystem();

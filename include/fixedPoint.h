@@ -20,7 +20,7 @@ public:
   Bit *bits;
   // Integer val;
   int length = 0;
-  int decimalBits = 2;
+  int decimalBits = 24;
   int totalBits = 2*decimalBits;
   int party;
 
@@ -53,7 +53,7 @@ public:
     string str, bin;
     int temp = 0;
     str = to_string(num);
-    bin = std::bitset<2>(num).to_string();
+    bin = std::bitset<24>(num).to_string();
     
     reverse(bin.begin(), bin.end());
     int l = (bin.size() > (size_t)len ? len : bin.size());

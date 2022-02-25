@@ -82,8 +82,8 @@ public:
   double **LCA_ne;
   double **A_BK_ne;
   double **Bug_ne;
-  // double **Nu_ne;
-  // double **Tau_ne;
+  double **Nu_ne;
+  double **Tau_ne;
   double **uTilder_ne;
   double **xgamma_ne;
   
@@ -253,13 +253,17 @@ Functions required for the operations. Not focused on the control system
     this->C_ne  = init_size_file( data_folder + "C.txt", this->sizeC);    
     this->K_ne  = init_size_file( data_folder + "K.txt", this->sizeK);
     this->L_ne  = init_size_file( data_folder + "L.txt", this->sizeL);
+    this->Tau_ne = init_size_file( data_folder + "Tau.txt", this->sizeTau);
+    this->Nu_ne  = init_size_file( data_folder + "Nu.txt", this->sizeNu);
 
     // Load data of matrices A, B, C, K, L
-    readFile(this->A_ne, data_folder + "A.txt", this->sizeA);
-    readFile(this->B_ne, data_folder + "B.txt", this->sizeB);
-    readFile(this->C_ne, data_folder + "C.txt", this->sizeC);
-    readFile(this->K_ne, data_folder + "K.txt", this->sizeK);
-    readFile(this->L_ne, data_folder + "L.txt", this->sizeL);
+    readFile(this->A_ne,   data_folder + "A.txt", this->sizeA);
+    readFile(this->B_ne,   data_folder + "B.txt", this->sizeB);
+    readFile(this->C_ne,   data_folder + "C.txt", this->sizeC);
+    readFile(this->K_ne,   data_folder + "K.txt", this->sizeK);
+    readFile(this->L_ne,   data_folder + "L.txt", this->sizeL);
+    readFile(this->Tau_ne, data_folder + "Tau.txt", this->sizeTau);
+    readFile(this->Nu_ne,  data_folder + "Nu.txt", this->sizeNu);
     for (int i = 0; i < this->sizeK[0]; i++) 
       for (int j = 0; j < this->sizeK[1]; j++) 
         this->K_ne[i][j] = -this->K_ne[i][j];
@@ -274,8 +278,6 @@ Functions required for the operations. Not focused on the control system
     this->ur  = init_size_using_file_GC( data_folder + "ur.txt",  this->sizeur );
     this->xr  = init_size_using_file_GC( data_folder + "xr.txt",  this->sizexr );
     this->xk  = initSize_GC( this->sizexr );
-    this->Nu  = init_size_using_file_GC( data_folder + "Nu.txt",  this->sizeNu );
-    this->Tau = init_size_using_file_GC( data_folder + "Tau.txt", this->sizeTau );
     this->sizezk[0] = this->sizeC[0];
     this->sizezk[1] = this->sizexr[1];
     this->zk  = initSize_GC( this->sizezk );
@@ -286,6 +288,8 @@ Functions required for the operations. Not focused on the control system
     this->K   = initSize_GC( this->sizeK );
     this->L   = initSize_GC( this->sizeL );
     this->B   = initSize_GC( this->sizeB );
+    this->Nu  = initSize_GC( this->sizeNu );
+    this->Tau = initSize_GC( this->sizeTau );
     this->sizeuk[0] = this->sizeur[0];
     this->sizeuk[1] = this->sizeur[1];
     
@@ -294,14 +298,15 @@ Functions required for the operations. Not focused on the control system
     setData_GC( this->K, this->K_ne, this->sizeK, BOB);
     setData_GC( this->L, this->L_ne, this->sizeL, BOB);
     setData_GC( this->B, this->B_ne, this->sizeB, BOB);
+    setData_GC( this->Tau, this->Tau_ne, this->sizeTau, BOB);
+    setData_GC( this->Nu, this->Nu_ne, this->sizeNu, BOB);
 
     // Initialize System's secret
     setZero_GC( this->zk,  this->sizezk,  ALICE);  
     setZero_GC( this->xk,  this->sizexk,  ALICE);
     setZero_GC( this->xr,  this->sizexr,  ALICE);
     setZero_GC( this->ur,  this->sizeur,  ALICE);  
-    setZero_GC( this->Nu,  this->sizeNu,  ALICE);
-    setZero_GC( this->Tau, this->sizeTau, ALICE);
+    
 
 
     this->sizegamma3[0] = this->sizeB[0];

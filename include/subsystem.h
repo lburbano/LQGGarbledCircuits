@@ -72,10 +72,10 @@ public:
   fixedPoint **Cusum;
   int sizeNu[2];
   fixedPoint **Nu;
-  double **Nu_ne;
+  
   int sizeTau[2];
   fixedPoint **Tau;
-  double **Tau_ne;
+  
 
 
   fixedPoint **uTilder;
@@ -259,8 +259,8 @@ public:
     this->zk_ne  = init_size_file( data_folder + "x0.txt", this->sizezk);
     this->ur_ne  = init_size_file( data_folder + "ur.txt", this->sizeur);
     this->xr_ne  = init_size_file( data_folder + "xr.txt", this->sizexr);
-    this->Tau_ne = init_size_file( data_folder + "Tau.txt", this->sizeTau);
-    this->Nu_ne  = init_size_file( data_folder + "Nu.txt", this->sizeNu);
+    // this->Tau_ne = init_size_file( data_folder + "Tau.txt", this->sizeTau);
+    // this->Nu_ne  = init_size_file( data_folder + "Nu.txt", this->sizeNu);
 
     // Load data of matrices A, B, C, x0, y0, xr, ur, tau, nu
     readFile(this->A_ne, data_folder + "A.txt", this->sizeA);
@@ -270,8 +270,7 @@ public:
     readFile(this->zk_ne, data_folder + "x0.txt", this->sizezk);
     readFile(this->ur_ne, data_folder + "ur.txt", this->sizeur);
     readFile(this->xr_ne, data_folder + "xr.txt", this->sizexr);
-    readFile(this->Tau_ne, data_folder + "Tau.txt", this->sizeTau);
-    readFile(this->Nu_ne, data_folder + "Nu.txt", this->sizeNu);
+    
 
     // this->sizezk[0] = this->sizeC[0];
     // this->sizezk[1] = this->sizexk[1];
@@ -280,21 +279,23 @@ public:
     this->ur  = initSize_GC( this->sizeur );
     this->xr  = initSize_GC( this->sizexr );
     this->xk  = initSize_GC( this->sizexk );
-    this->Nu  = initSize_GC( this->sizeNu );
-    this->Tau = initSize_GC( this->sizeTau );
     this->zk  = initSize_GC( this->sizezk );
     
     // Initializes as fixedPoint cloud's secrets
-    this->K   = init_size_using_file_GC(data_folder + "K.txt", this->sizeK);
-    this->L   = init_size_using_file_GC(data_folder + "L.txt", this->sizeL);
+    this->K   = init_size_using_file_GC( data_folder + "K.txt", this->sizeK );
+    this->L   = init_size_using_file_GC( data_folder + "L.txt", this->sizeL );
+    this->Tau = init_size_using_file_GC( data_folder + "Tau.txt", this->sizeTau );
+    this->Nu  = init_size_using_file_GC( data_folder + "Nu.txt", this->sizeNu );
     this->B   = initSize_GC( this->sizeB );
     
     
     
     // Puts data to cloud's secrets
-    setZero_GC( this->K, this->sizeK, BOB);
-    setZero_GC( this->L, this->sizeL, BOB);
-    setZero_GC( this->B, this->sizeB, BOB);
+    setZero_GC( this->K,   this->sizeK, BOB);
+    setZero_GC( this->L,   this->sizeL, BOB);
+    setZero_GC( this->B,   this->sizeB, BOB);
+    setZero_GC( this->Tau, this->sizeTau, BOB);
+    setZero_GC( this->Nu,  this->sizeNu, BOB);
     
     
     this->sizeuk[0] = this->sizeur[0];
@@ -304,8 +305,6 @@ public:
     setData_GC( this->xk, this->xk_ne, this->sizezk, ALICE);
     setData_GC( this->xr, this->xr_ne, this->sizexr, ALICE);
     setData_GC( this->ur, this->ur_ne, this->sizeur, ALICE);
-    setData_GC( this->Nu, this->Nu_ne, this->sizeNu, ALICE);
-    setData_GC( this->Tau, this->Tau_ne, this->sizeTau, ALICE);
     this->uk_ne  = init_size( this->sizeur );
 
 
