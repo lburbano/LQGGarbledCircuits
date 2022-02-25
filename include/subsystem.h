@@ -100,12 +100,13 @@ public:
   // TODO: change name. This is a simulation of the system evolution, not a measurement
   //       add noise
   void measureState(fixedPoint **uk) {
-    for (int i = 0; i < this->sizeur[0]; i++) {
-      for (int j = 0; j < this->sizeur[1]; j++) {
-        // get the control action
+    auto init = high_resolution_clock::now();
+    for (int i = 0; i < this->sizeur[0]; i++) 
+      for (int j = 0; j < this->sizeur[1]; j++) 
         this->uk_ne[i][j] = uk[i][j].reveal<double>(ALICE);
-      }
-    }
+    auto end = high_resolution_clock::now();
+    cout << std::chrono::duration_cast<std::chrono::microseconds>(end - init).count() << ", ";
+
     double *AxkIn = new double[this->sizeA[0]];
     double *Buk = new double[this->sizeB[0]];
     // Compute A*x, B*u 
@@ -123,8 +124,10 @@ public:
   // Updates zk to use it in the emp library for the next iteration
   void computezk() {
     matrixMulNE(this->C_ne, this->xk_ne, this->zk_ne, this->sizeC, this->sizexk);
+    auto init = high_resolution_clock::now();
     setData_GC( this->zk, zk_ne, this->sizezk, ALICE);
-    
+    auto end = high_resolution_clock::now();
+    cout << std::chrono::duration_cast<std::chrono::microseconds>(end - init).count() << ", ";
   }
 
   // Computes the gamma matrices in plaintext.

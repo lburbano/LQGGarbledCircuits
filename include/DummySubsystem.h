@@ -95,20 +95,21 @@ public:
 
   // Reveals the value of u[k] to the system
   void measureState(fixedPoint **uk) {
-    for (int i = 0; i < this->sizeur[0]; i++) {
-      for (int j = 0; j < this->sizeur[1]; j++) {
+    auto init = high_resolution_clock::now();
+    for (int i = 0; i < this->sizeur[0]; i++) 
+      for (int j = 0; j < this->sizeur[1]; j++) 
         uk[i][j].reveal<double>(ALICE);
-      }
-    }
-    for (int i = 0; i < this->sizeA[0]; i++) {
-      //this->xk_ne[i][0] = 0 /*+ wk[i][0]*/;
-    }
+    auto end = high_resolution_clock::now();
+    cout << std::chrono::duration_cast<std::chrono::microseconds>(end - init).count() << ", ";
   }
 
   // Creates z[k] to be used by the emp library.
   // Value is set to zero since the cloud party does not have the plaintext of z[k]
   void computezk() {
+    auto init = high_resolution_clock::now();
     setZero_GC( this->zk, this->sizezk, ALICE);
+    auto end = high_resolution_clock::now();
+    cout << std::chrono::duration_cast<std::chrono::microseconds>(end - init).count() << ", ";
   }
 
   // Creates a representation of the constants related to the controller to be used with the emp toolkit
