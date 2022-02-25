@@ -238,9 +238,6 @@ public:
     }
     Bit zero(0, ALICE);
     for (int i = 0; i < this->sizeA_BK[0]; i++) {
-      this->alarm[i][0] = zero;                               // Should we change this?
-                                                              // Maybe this should be a parameter of the function
-                                                              // cloud should learn nothing about this value
       this->alarm_ne[i][0] = 0;
     }
   }
