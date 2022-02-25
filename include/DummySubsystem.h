@@ -95,21 +95,15 @@ public:
 
   // Reveals the value of u[k] to the system
   void measureState(fixedPoint **uk) {
-    auto init = high_resolution_clock::now();
     for (int i = 0; i < this->sizeur[0]; i++) 
       for (int j = 0; j < this->sizeur[1]; j++) 
         uk[i][j].reveal<double>(ALICE);
-    auto end = high_resolution_clock::now();
-    cout << std::chrono::duration_cast<std::chrono::microseconds>(end - init).count() << ", ";
   }
 
   // Creates z[k] to be used by the emp library.
   // Value is set to zero since the cloud party does not have the plaintext of z[k]
   void computezk() {
-    auto init = high_resolution_clock::now();
     setZero_GC( this->zk, this->sizezk, ALICE);
-    auto end = high_resolution_clock::now();
-    cout << std::chrono::duration_cast<std::chrono::microseconds>(end - init).count() << ", ";
   }
 
   // Creates a representation of the constants related to the controller to be used with the emp toolkit
@@ -117,8 +111,22 @@ public:
   // Nomenclature based on 
   // Encrypted LQG using Labeled Homomorphic Encryption. https://www.georgejpappas.org/papers/Paper264.pdf
   void garbleConstants(int load_data) {
-    // compute gamma3
     
+    // Initialize Cloud's secret
+    setData_GC( this->K, this->K_ne, this->sizeK, BOB);
+    setData_GC( this->L, this->L_ne, this->sizeL, BOB);
+    setData_GC( this->B, this->B_ne, this->sizeB, BOB);
+    setData_GC( this->Tau, this->Tau_ne, this->sizeTau, BOB);
+    setData_GC( this->Nu, this->Nu_ne, this->sizeNu, BOB);
+
+    // Initialize System's secret
+    setZero_GC( this->zk,    this->sizezk,    ALICE);  
+    setZero_GC( this->xk,    this->sizexk,    ALICE);
+    setZero_GC( this->xr,    this->sizexr,    ALICE);
+    setZero_GC( this->ur,    this->sizeur,    ALICE);  
+    setZero_GC( this->xHatk, this->sizexHatk, ALICE);
+    setZero_GC( this->yp,    this->sizexHatk, ALICE);
+
     setData_GC(this->gamma1, this->gamma1_ne, this->sizegamma1, BOB);
     setData_GC(this->gamma2, this->gamma2_ne, this->sizegamma2, BOB);
     setData_GC(this->gamma3, this->gamma3_ne, this->sizegamma3, BOB);
@@ -298,20 +306,6 @@ Functions required for the operations. Not focused on the control system
     this->sizeuk[1] = this->sizeur[1];
     
 
-    // Initialize Cloud's secret
-    setData_GC( this->K, this->K_ne, this->sizeK, BOB);
-    setData_GC( this->L, this->L_ne, this->sizeL, BOB);
-    setData_GC( this->B, this->B_ne, this->sizeB, BOB);
-    setData_GC( this->Tau, this->Tau_ne, this->sizeTau, BOB);
-    setData_GC( this->Nu, this->Nu_ne, this->sizeNu, BOB);
-
-    // Initialize System's secret
-    setZero_GC( this->zk,    this->sizezk,    ALICE);  
-    setZero_GC( this->xk,    this->sizexk,    ALICE);
-    setZero_GC( this->xr,    this->sizexr,    ALICE);
-    setZero_GC( this->ur,    this->sizeur,    ALICE);  
-    setZero_GC( this->xHatk, this->sizexHatk, ALICE);
-    setZero_GC( this->yp,    this->sizexHatk, ALICE);
 
 
     this->sizegamma3[0] = this->sizeB[0];

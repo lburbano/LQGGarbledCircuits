@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
 
 
   
-  for (k = 0; k < 2; k++) {
+  for (k = 0; k < 20; k++) {
 
     if (k > 0){
       cloud->predict();

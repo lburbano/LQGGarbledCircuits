@@ -100,12 +100,9 @@ public:
   // TODO: change name. This is a simulation of the system evolution, not a measurement
   //       add noise
   void measureState(fixedPoint **uk) {
-    auto init = high_resolution_clock::now();
     for (int i = 0; i < this->sizeur[0]; i++) 
       for (int j = 0; j < this->sizeur[1]; j++) 
         this->uk_ne[i][j] = uk[i][j].reveal<double>(ALICE);
-    auto end = high_resolution_clock::now();
-    cout << std::chrono::duration_cast<std::chrono::microseconds>(end - init).count() << ", ";
 
     double *AxkIn = new double[this->sizeA[0]];
     double *Buk = new double[this->sizeB[0]];
@@ -124,10 +121,7 @@ public:
   // Updates zk to use it in the emp library for the next iteration
   void computezk() {
     matrixMulNE(this->C_ne, this->xk_ne, this->zk_ne, this->sizeC, this->sizexk);
-    auto init = high_resolution_clock::now();
     setData_GC( this->zk, zk_ne, this->sizezk, ALICE);
-    auto end = high_resolution_clock::now();
-    cout << std::chrono::duration_cast<std::chrono::microseconds>(end - init).count() << ", ";
   }
 
   // Computes the gamma matrices in plaintext.
@@ -175,7 +169,24 @@ public:
   // Assumes that the constants are already computed in plaintext
   void garbleControlConstants( int load_data ) {
     // gamma3
+    // Puts data to cloud's secrets
+    setZero_GC( this->K,   this->sizeK, BOB);
+    setZero_GC( this->L,   this->sizeL, BOB);
+    setZero_GC( this->B,   this->sizeB, BOB);
+    setZero_GC( this->Tau, this->sizeTau, BOB);
+    setZero_GC( this->Nu,  this->sizeNu, BOB);
     
+    
+    
+    // Puts data into system's secrets
+    setData_GC( this->zk,    this->xk_ne,    this->sizezk, ALICE);  
+    setData_GC( this->xk,    this->xk_ne,    this->sizezk, ALICE);
+    setData_GC( this->xr,    this->xr_ne,    this->sizexr, ALICE);
+    setData_GC( this->ur,    this->ur_ne,    this->sizeur, ALICE);
+    setData_GC( this->xHatk, this->xHatk_ne, this->sizexHatk, ALICE);
+    setData_GC( this->yp,    this->xHatk_ne, this->sizexHatk, ALICE);
+
+
     setZero_GC( this->gamma1, this->sizegamma1, BOB);
     setZero_GC( this->gamma2, this->sizegamma2, BOB);
     setZero_GC( this->gamma3, this->sizegamma3, BOB);
@@ -298,24 +309,9 @@ public:
     this->B   = initSize_GC( this->sizeB );
     
     
-    
-    // Puts data to cloud's secrets
-    setZero_GC( this->K,   this->sizeK, BOB);
-    setZero_GC( this->L,   this->sizeL, BOB);
-    setZero_GC( this->B,   this->sizeB, BOB);
-    setZero_GC( this->Tau, this->sizeTau, BOB);
-    setZero_GC( this->Nu,  this->sizeNu, BOB);
-    
-    
     this->sizeuk[0] = this->sizeur[0];
     this->sizeuk[1] = this->sizeur[1];
-    // Puts data into system's secrets
-    setData_GC( this->zk,    this->xk_ne,    this->sizezk, ALICE);  
-    setData_GC( this->xk,    this->xk_ne,    this->sizezk, ALICE);
-    setData_GC( this->xr,    this->xr_ne,    this->sizexr, ALICE);
-    setData_GC( this->ur,    this->ur_ne,    this->sizeur, ALICE);
-    setData_GC( this->xHatk, this->xHatk_ne, this->sizexHatk, ALICE);
-    setData_GC( this->yp,    this->xHatk_ne, this->sizexHatk, ALICE);
+    
     this->uk_ne  = init_size( this->sizeur );
 
 
