@@ -60,6 +60,7 @@ public:
   fixedPoint **xgamma;
   int sizexgamma[2];
   fixedPoint **xHatk;
+  fixedPoint **yp;
   int sizexHatk[2];
   fixedPoint **uk;
   int sizeuk[2];
@@ -275,12 +276,14 @@ Functions required for the operations. Not focused on the control system
     
     // Initializes system's secrets
     
-    this->ur  = init_size_using_file_GC( data_folder + "ur.txt",  this->sizeur );
-    this->xr  = init_size_using_file_GC( data_folder + "xr.txt",  this->sizexr );
-    this->xk  = initSize_GC( this->sizexr );
+    this->ur     = init_size_using_file_GC( data_folder + "ur.txt",  this->sizeur );
+    this->xr     = init_size_using_file_GC( data_folder + "xr.txt",  this->sizexr );
+    this->xk     = initSize_GC( this->sizexr );
     this->sizezk[0] = this->sizeC[0];
     this->sizezk[1] = this->sizexr[1];
-    this->zk  = initSize_GC( this->sizezk );
+    this->zk     = initSize_GC( this->sizezk );
+    this->xHatk  = init_size_using_file_GC( data_folder + "x0.txt", this->sizexHatk );
+    this->yp     = initSize_GC( this->sizezk );
 
     this->sizexk[0] = this->sizexr[0];
     this->sizexk[1] = this->sizexr[1];
@@ -302,11 +305,12 @@ Functions required for the operations. Not focused on the control system
     setData_GC( this->Nu, this->Nu_ne, this->sizeNu, BOB);
 
     // Initialize System's secret
-    setZero_GC( this->zk,  this->sizezk,  ALICE);  
-    setZero_GC( this->xk,  this->sizexk,  ALICE);
-    setZero_GC( this->xr,  this->sizexr,  ALICE);
-    setZero_GC( this->ur,  this->sizeur,  ALICE);  
-    
+    setZero_GC( this->zk,    this->sizezk,    ALICE);  
+    setZero_GC( this->xk,    this->sizexk,    ALICE);
+    setZero_GC( this->xr,    this->sizexr,    ALICE);
+    setZero_GC( this->ur,    this->sizeur,    ALICE);  
+    setZero_GC( this->xHatk, this->sizexHatk, ALICE);
+    setZero_GC( this->yp,    this->sizexHatk, ALICE);
 
 
     this->sizegamma3[0] = this->sizeB[0];

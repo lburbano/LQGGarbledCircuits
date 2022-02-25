@@ -5,19 +5,10 @@
 #include "DummySubsystem.h"
 
 void print_init(Cloud *cloud, subSystem *subsystem, int k) {
-  cout << "u" << 0 << ":  " << endl;
-  for (int i = 0; i < cloud->sizeuk[0]; i++) {
-    for (int j = 0; j < cloud->sizeuk[1]; j++) {
-      cout << fixed << setprecision(5) << cloud->uk[i][j].reveal<double>(ALICE)
-           << ", ";
-    }
-    cout << endl;
-  }
-  cout << endl << endl;
   cout << "z" << k << ":  " << endl;
   for (int i = 0; i < subsystem->sizexk[0]; i++) {
     for (int j = 0; j < subsystem->sizexk[1]; j++) {
-      cout << subsystem->zk[i][j].reveal<double>(ALICE) << ", ";
+      cout << fixed << setprecision(5) << subsystem->zk[i][j].reveal<double>(ALICE) << ", ";
     }
     cout << endl;
   }
@@ -109,7 +100,8 @@ int main(int argc, char **argv) {
                    subsystem->sizeTau, subsystem->Cusum, subsystem->sizeCusum,
                    subsystem->A_BK, subsystem->sizeA_BK, subsystem->Bug, subsystem->sizeBug, //maybe changed
                    subsystem->xr, subsystem->sizexr, subsystem->ur,
-                   subsystem->sizeur, subsystem->xk, subsystem->sizexk);
+                   subsystem->sizeur, subsystem->xk, subsystem->sizexk,
+                   subsystem->xHatk, subsystem->yp);
 
   // cloud->computeConstants();
 
@@ -124,7 +116,9 @@ int main(int argc, char **argv) {
 
   cout << endl;
   // Control loop
-  for (k = 0; k < 10; k++) {
+
+  
+  for (k = 0; k < 2; k++) {
     if (k > 0){
       cloud->predict();
       cloud->computexHat(subsystem->zk);

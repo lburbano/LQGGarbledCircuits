@@ -89,6 +89,7 @@ public:
   int sizexHatk[2];
   fixedPoint **uk;
   int sizeuk[2];
+  fixedPoint **yp;
 
 
   subSystem() {}
@@ -252,13 +253,15 @@ public:
   void inputData(int load_data) {
     string data_folder = "Data/";
     // Initializes matrices A, B, C, x0, y0, xr, ur, tau, nu
-    this->A_ne   = init_size_file( data_folder + "A.txt", this->sizeA);
-    this->B_ne   = init_size_file( data_folder + "B.txt", this->sizeB);
-    this->C_ne   = init_size_file( data_folder + "C.txt", this->sizeC);    
-    this->xk_ne  = init_size_file( data_folder + "x0.txt", this->sizexk);
-    this->zk_ne  = init_size_file( data_folder + "x0.txt", this->sizezk);
-    this->ur_ne  = init_size_file( data_folder + "ur.txt", this->sizeur);
-    this->xr_ne  = init_size_file( data_folder + "xr.txt", this->sizexr);
+    this->A_ne     = init_size_file( data_folder + "A.txt", this->sizeA);
+    this->B_ne     = init_size_file( data_folder + "B.txt", this->sizeB);
+    this->C_ne     = init_size_file( data_folder + "C.txt", this->sizeC);    
+    this->xk_ne    = init_size_file( data_folder + "x0.txt", this->sizexk);
+    this->zk_ne    = init_size_file( data_folder + "x0.txt", this->sizezk);
+    this->xHatk_ne = init_size_file( data_folder + "x0.txt", this->sizexHatk);
+    this->ur_ne    = init_size_file( data_folder + "ur.txt", this->sizeur);
+    this->xr_ne    = init_size_file( data_folder + "xr.txt", this->sizexr);
+    
     // this->Tau_ne = init_size_file( data_folder + "Tau.txt", this->sizeTau);
     // this->Nu_ne  = init_size_file( data_folder + "Nu.txt", this->sizeNu);
 
@@ -267,6 +270,7 @@ public:
     readFile(this->B_ne, data_folder + "B.txt", this->sizeB);
     readFile(this->C_ne, data_folder + "C.txt", this->sizeC);
     readFile(this->xk_ne, data_folder + "x0.txt", this->sizexk);
+    readFile(this->xHatk_ne, data_folder + "x0.txt", this->sizexHatk);
     readFile(this->zk_ne, data_folder + "x0.txt", this->sizezk);
     readFile(this->ur_ne, data_folder + "ur.txt", this->sizeur);
     readFile(this->xr_ne, data_folder + "xr.txt", this->sizexr);
@@ -276,10 +280,12 @@ public:
     // this->sizezk[1] = this->sizexk[1];
     
     // Initializes as fixedPoint System's secrets
-    this->ur  = initSize_GC( this->sizeur );
-    this->xr  = initSize_GC( this->sizexr );
-    this->xk  = initSize_GC( this->sizexk );
-    this->zk  = initSize_GC( this->sizezk );
+    this->ur     = initSize_GC( this->sizeur );
+    this->xr     = initSize_GC( this->sizexr );
+    this->xk     = initSize_GC( this->sizexk );
+    this->zk     = initSize_GC( this->sizezk );
+    this->xHatk  = initSize_GC( this->sizexHatk );
+    this->yp     = initSize_GC( this->sizexHatk );
     
     // Initializes as fixedPoint cloud's secrets
     this->K   = init_size_using_file_GC( data_folder + "K.txt", this->sizeK );
@@ -301,10 +307,12 @@ public:
     this->sizeuk[0] = this->sizeur[0];
     this->sizeuk[1] = this->sizeur[1];
     // Puts data into system's secrets
-    setData_GC( this->zk, this->xk_ne, this->sizezk, ALICE);  
-    setData_GC( this->xk, this->xk_ne, this->sizezk, ALICE);
-    setData_GC( this->xr, this->xr_ne, this->sizexr, ALICE);
-    setData_GC( this->ur, this->ur_ne, this->sizeur, ALICE);
+    setData_GC( this->zk,    this->xk_ne,    this->sizezk, ALICE);  
+    setData_GC( this->xk,    this->xk_ne,    this->sizezk, ALICE);
+    setData_GC( this->xr,    this->xr_ne,    this->sizexr, ALICE);
+    setData_GC( this->ur,    this->ur_ne,    this->sizeur, ALICE);
+    setData_GC( this->xHatk, this->xHatk_ne, this->sizexHatk, ALICE);
+    setData_GC( this->yp,    this->xHatk_ne, this->sizexHatk, ALICE);
     this->uk_ne  = init_size( this->sizeur );
 
 
