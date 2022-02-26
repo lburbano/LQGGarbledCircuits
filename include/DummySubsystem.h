@@ -2,7 +2,7 @@
 #define SUBSYSTEM_H
 #include "fixedPoint.h"
 #include "garbled_circuit_user.h"
-// CHange all Alice to BOB?
+// CHange all parties[0] to parties[1]?
 class subSystem: public garbled_circuit_user {
 public:
   // declares the constants for the system.
@@ -87,9 +87,14 @@ public:
   double **Tau_ne;
   double **uTilder_ne;
   double **xgamma_ne;
+
+  int parties[2];
   
 
-  subSystem() {}
+  subSystem(int *parties) {
+    this->parties[0] = parties[0];
+    this->parties[1] = parties[1];
+  }
 
   
 
@@ -97,40 +102,41 @@ public:
   void measureState(fixedPoint **uk) {
     for (int i = 0; i < this->sizeur[0]; i++) 
       for (int j = 0; j < this->sizeur[1]; j++) 
-        uk[i][j].reveal<double>(ALICE);
+        uk[i][j].reveal<double>(parties[0]);
+    
   }
 
   // Creates z[k] to be used by the emp library.
   // Value is set to zero since the cloud party does not have the plaintext of z[k]
   void computezk() {
-    setZero_GC( this->zk, this->sizezk, ALICE);
+    setZero_GC( this->zk, this->sizezk, parties[0]);
   }
 
   // Creates a representation of the constants related to the controller to be used with the emp toolkit
   // The values are initialized as zero here since the cloud should not learn the plaintexts
   // Nomenclature based on 
   // Encrypted LQG using Labeled Homomorphic Encryption. https://www.georgejpappas.org/papers/Paper264.pdf
-  void garbleConstants(int load_data) {
+  void garbleConstants(  ) {
     
     // Initialize Cloud's secret
-    setData_GC( this->K, this->K_ne, this->sizeK, BOB);
-    setData_GC( this->L, this->L_ne, this->sizeL, BOB);
-    setData_GC( this->B, this->B_ne, this->sizeB, BOB);
-    setData_GC( this->Tau, this->Tau_ne, this->sizeTau, BOB);
-    setData_GC( this->Nu, this->Nu_ne, this->sizeNu, BOB);
+    setData_GC( this->K, this->K_ne, this->sizeK, parties[1]);
+    setData_GC( this->L, this->L_ne, this->sizeL, parties[1]);
+    setData_GC( this->B, this->B_ne, this->sizeB, parties[1]);
+    setData_GC( this->Tau, this->Tau_ne, this->sizeTau, parties[1]);
+    setData_GC( this->Nu, this->Nu_ne, this->sizeNu, parties[1]);
 
     // Initialize System's secret
-    setZero_GC( this->zk,    this->sizezk,    ALICE);  
-    setZero_GC( this->xk,    this->sizexk,    ALICE);
-    setZero_GC( this->xr,    this->sizexr,    ALICE);
-    setZero_GC( this->ur,    this->sizeur,    ALICE);  
-    setZero_GC( this->xHatk, this->sizexHatk, ALICE);
-    setZero_GC( this->yp,    this->sizexHatk, ALICE);
+    setZero_GC( this->zk,    this->sizezk,    parties[0]);  
+    setZero_GC( this->xk,    this->sizexk,    parties[0]);
+    setZero_GC( this->xr,    this->sizexr,    parties[0]);
+    setZero_GC( this->ur,    this->sizeur,    parties[0]);  
+    setZero_GC( this->xHatk, this->sizexHatk, parties[0]);
+    setZero_GC( this->yp,    this->sizexHatk, parties[0]);
 
-    setData_GC(this->gamma1, this->gamma1_ne, this->sizegamma1, BOB);
-    setData_GC(this->gamma2, this->gamma2_ne, this->sizegamma2, BOB);
-    setData_GC(this->gamma3, this->gamma3_ne, this->sizegamma3, BOB);
-    setData_GC(this->A_BK, this->A_BK_ne, this->sizeA, BOB);
+    setData_GC(this->gamma1, this->gamma1_ne, this->sizegamma1, parties[1]);
+    setData_GC(this->gamma2, this->gamma2_ne, this->sizegamma2, parties[1]);
+    setData_GC(this->gamma3, this->gamma3_ne, this->sizegamma3, parties[1]);
+    setData_GC(this->A_BK, this->A_BK_ne, this->sizeA, parties[1]);
     
     
   }
@@ -148,12 +154,12 @@ public:
     this->xgamma = initSize_GC( this->sizexgamma);
 
     
-    setData_GC( this->uTilder, this->uTilder_ne, this->sizeuTilder, BOB);
-    setData_GC( this->xgamma, this->xgamma_ne, this->sizexgamma, BOB);
+    setData_GC( this->uTilder, this->uTilder_ne, this->sizeuTilder, parties[1]);
+    setData_GC( this->xgamma, this->xgamma_ne, this->sizexgamma, parties[1]);
 
     for (int i = 0; i < this->sizeB[0]; i++) {
       for (int j = 0; j < this->sizexk[1]; j++) {
-        this->Bug[i][j] = fixedPoint(this->Bug_ne[i][j], decimalBits, integerBits, BOB);
+        this->Bug[i][j] = fixedPoint(this->Bug_ne[i][j], decimalBits, integerBits, parties[1]);
       }
     }
     
@@ -244,7 +250,7 @@ Functions required for the operations. Not focused on the control system
 ---------------------------------------------------------------------------*/
 
   // Creates instances of vectors and matrices to be used by the emp toolkit
-  void inputData(int load_data) {
+  void inputData( ) {
     // The size of matrices are retrieved from the .txt files, however the information is
     // never used in the function. It does not make sense the cloud learns the plaintext of 
     // matrices

@@ -11,6 +11,7 @@ $ cmake ..
 $ make
 ```
 ## Running 
+### Scenario 1: System garbler
 Terminal 1
 ```
 ./bin/system 1 12345
@@ -19,4 +20,14 @@ Terminal 1
 Terminal 2
 ```
 ./bin/cloud 2 12345
+```
+### Scenario 2: Cloud garbler
+Terminal 1
+```
+./bin/system 2 12345
+```
+
+Terminal 2
+```
+./bin/cloud 1 12345
 ```

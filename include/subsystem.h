@@ -1,5 +1,5 @@
 // This class represents the physical system.
-// Change all Alice to BOB?
+// Change all parties[0]  to parties[1]?
 #ifndef SUBSYSTEM_H
 #define SUBSYSTEM_H
 #include "fixedPoint.h"
@@ -90,9 +90,12 @@ public:
   fixedPoint **uk;
   int sizeuk[2];
   fixedPoint **yp;
+  int parties[2];
 
-
-  subSystem() {}
+  subSystem(int *parties) {
+    this->parties[0] = parties[0];
+    this->parties[1] = parties[1];
+  }
 
   
 
@@ -102,8 +105,8 @@ public:
   void measureState(fixedPoint **uk) {
     for (int i = 0; i < this->sizeur[0]; i++) 
       for (int j = 0; j < this->sizeur[1]; j++) 
-        this->uk_ne[i][j] = uk[i][j].reveal<double>(ALICE);
-
+        this->uk_ne[i][j] = uk[i][j].reveal<double>( parties[0] );
+    
     double *AxkIn = new double[this->sizeA[0]];
     double *Buk = new double[this->sizeB[0]];
     // Compute A*x, B*u 
@@ -121,7 +124,7 @@ public:
   // Updates zk to use it in the emp library for the next iteration
   void computezk() {
     matrixMulNE(this->C_ne, this->xk_ne, this->zk_ne, this->sizeC, this->sizexk);
-    setData_GC( this->zk, zk_ne, this->sizezk, ALICE);
+    setData_GC( this->zk, zk_ne, this->sizezk, parties[0] );
   }
 
   // Computes the gamma matrices in plaintext.
@@ -167,30 +170,30 @@ public:
 
   // Create a representation of the control matrices to use the emp library
   // Assumes that the constants are already computed in plaintext
-  void garbleControlConstants( int load_data ) {
+  void garbleControlConstants(  ) {
     // gamma3
     // Puts data to cloud's secrets
-    setZero_GC( this->K,   this->sizeK, BOB);
-    setZero_GC( this->L,   this->sizeL, BOB);
-    setZero_GC( this->B,   this->sizeB, BOB);
-    setZero_GC( this->Tau, this->sizeTau, BOB);
-    setZero_GC( this->Nu,  this->sizeNu, BOB);
+    setZero_GC( this->K,   this->sizeK, parties[1]);
+    setZero_GC( this->L,   this->sizeL, parties[1]);
+    setZero_GC( this->B,   this->sizeB, parties[1]);
+    setZero_GC( this->Tau, this->sizeTau, parties[1]);
+    setZero_GC( this->Nu,  this->sizeNu, parties[1]);
     
     
     
     // Puts data into system's secrets
-    setData_GC( this->zk,    this->xk_ne,    this->sizezk, ALICE);  
-    setData_GC( this->xk,    this->xk_ne,    this->sizezk, ALICE);
-    setData_GC( this->xr,    this->xr_ne,    this->sizexr, ALICE);
-    setData_GC( this->ur,    this->ur_ne,    this->sizeur, ALICE);
-    setData_GC( this->xHatk, this->xHatk_ne, this->sizexHatk, ALICE);
-    setData_GC( this->yp,    this->xHatk_ne, this->sizexHatk, ALICE);
+    setData_GC( this->zk,    this->xk_ne,    this->sizezk, parties[0] );  
+    setData_GC( this->xk,    this->xk_ne,    this->sizezk, parties[0] );
+    setData_GC( this->xr,    this->xr_ne,    this->sizexr, parties[0] );
+    setData_GC( this->ur,    this->ur_ne,    this->sizeur, parties[0] );
+    setData_GC( this->xHatk, this->xHatk_ne, this->sizexHatk, parties[0] );
+    setData_GC( this->yp,    this->xHatk_ne, this->sizexHatk, parties[0] );
 
 
-    setZero_GC( this->gamma1, this->sizegamma1, BOB);
-    setZero_GC( this->gamma2, this->sizegamma2, BOB);
-    setZero_GC( this->gamma3, this->sizegamma3, BOB);
-    setZero_GC( this->A_BK, this->sizeA_BK, BOB );
+    setZero_GC( this->gamma1, this->sizegamma1, parties[1]);
+    setZero_GC( this->gamma2, this->sizegamma2, parties[1]);
+    setZero_GC( this->gamma3, this->sizegamma3, parties[1]);
+    setZero_GC( this->A_BK, this->sizeA_BK, parties[1] );
     
     
   }
@@ -250,12 +253,12 @@ public:
     this->xgamma = initSize_GC( this->sizexgamma );
 
     
-    setZero_GC( this->uTilder, this->sizeuTilder, BOB);
-    setZero_GC( this->xgamma,  this->sizexgamma, BOB);
+    setZero_GC( this->uTilder, this->sizeuTilder, parties[1]);
+    setZero_GC( this->xgamma,  this->sizexgamma, parties[1]);
 
     for (int i = 0; i < this->sizeB[0]; i++) {
       for (int j = 0; j < this->sizexk[1]; j++) {
-        this->Bug[i][j] = fixedPoint(0, decimalBits, integerBits, BOB);
+        this->Bug[i][j] = fixedPoint(0, decimalBits, integerBits, parties[1]);
       }
     }
     
@@ -264,7 +267,7 @@ public:
   }  
   // loads all the matrices required to compute the controller
   // and to simulate the system behavior
-  void inputData(int load_data) {
+  void inputData(  ) {
     string data_folder = "Data/";
     // Initializes matrices A, B, C, x0, y0, xr, ur, tau, nu
     this->A_ne     = init_size_file( data_folder + "A.txt", this->sizeA);

@@ -1,4 +1,4 @@
-// Change all Alice to BOB?
+// Change all parties[0] to BOB?
 #ifndef CLOUD_H
 #define CLOUD_H
 #include "fixedPoint.h"
@@ -40,10 +40,15 @@ public:
   int **alarm_ne;
 
   int HARD_CODE_ZEROES;
+  int parties[2];
 
   
 
-  Cloud() {}
+  Cloud(int *parties) {
+    this->parties[0] = parties[0];
+    this->parties[1] = parties[1];
+
+  }
 
   // class receives matrices to compute the controller and the anomaly detection
   void getInputs(fixedPoint **L, int *sizeL, fixedPoint **K, int *sizeK,
@@ -135,7 +140,7 @@ public:
 
     for (int i = 0; i < this->sizeCusum[0]; i++) 
       for (int j = 0; j < this->sizeCusum[1]; j++) 
-        this->Cusum[i][j] = fixedPoint(0, decimalBits, integerBits, ALICE);
+        this->Cusum[i][j] = fixedPoint(0, decimalBits, integerBits, parties[0]);
     
     for (int i = 0; i < this->sizeA_BK[0]; i++) 
       for (int j = 0; j < this->sizeA_BK[1]; j++) 
@@ -196,14 +201,14 @@ public:
   void computeCusum()//fixedPoint **xHat, fixedPoint **uk)
   {
     Bit *clipBelow = new Bit[this->sizeCusum[0]]; 
-    Bit zero(0, ALICE);                                      // Should we change this?
+    Bit zero(0, parties[0]);                                      // Should we change this?
                                                              // Maybe this should be a parameter of the function
                                                              // cloud should learn nothing about this value
     for (int i = 0; i < this->sizeCusum[0]; i++) {
       
       if(this->HARD_CODE_ZEROES == 1){
         if(this->alarm_ne[i][0] == 1){
-          this->Cusum[i][0] = fixedPoint(0, this->decimalBits, this->integerBits, ALICE);
+          this->Cusum[i][0] = fixedPoint(0, this->decimalBits, this->integerBits, parties[0]);
           this->alarm[i][0] = zero;
         } else{
           this->Cusum[i][0] = this->Cusum[i][0] + this->residues[i][0] - this->nu[i][0];
