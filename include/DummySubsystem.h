@@ -265,7 +265,7 @@ Functions required for the operations. Not focused on the control system
       this->A[i] = new fixedPoint[this->sizeA[1]];
     }
     */
-    string data_folder = "Data/";
+    string data_folder = "../Data/";
     // Load system matrices A, B, C, K, L
     this->A_ne  = init_size_file( data_folder + "A.txt", this->sizeA);
     this->B_ne  = init_size_file( data_folder + "B.txt", this->sizeB);

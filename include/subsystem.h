@@ -271,7 +271,7 @@ public:
   // loads all the matrices required to compute the controller
   // and to simulate the system behavior
   void inputData(  ) {
-    string data_folder = "Data/";
+    string data_folder = "../Data/";
     // Initializes matrices A, B, C, x0, y0, xr, ur, tau, nu
     this->A_ne     = init_size_file( data_folder + "A.txt", this->sizeA);
     this->B_ne     = init_size_file( data_folder + "B.txt", this->sizeB);
