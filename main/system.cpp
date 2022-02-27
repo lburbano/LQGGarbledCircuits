@@ -67,7 +67,8 @@ void print_rest(Cloud *cloud, subSystem *subsystem, int party, int k) {
 int main(int argc, char **argv) {
   int port, party;
   parse_party_and_port(argv, &party, &port);
-  int integer_bits = atoi( argv[3] ) / 2;
+  int niter = atoi( argv[3] );
+  int integer_bits = atoi( argv[4] ) / 2;
   if (integer_bits % 1 != 0)
   {
     cout << "Number of bits should be even" <<endl;
@@ -122,7 +123,7 @@ int main(int argc, char **argv) {
 
 
   
-  for (k = 0; k < 10; k++) {
+  for (k = 0; k < niter; k++) {
 
     if (k > 0){
       cloud->predict();
