@@ -67,17 +67,26 @@ void print_rest( Cloud *cloud, subSystem *subsystem, int party, int k) {
 int main(int argc, char **argv) {
   int port, party;
   parse_party_and_port(argv, &party, &port);
+  int integer_bits = atoi( argv[3] ) / 2;
+  if (integer_bits % 1 != 0)
+  {
+    cout << "Number of bits should be even" <<endl;
+    return 0;
+  }
+
   NetIO *io = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port);
   setup_semi_honest(io, party);
+
+
   bool print = 1;
   int parties[2];
   parties[0] = party == BOB ? ALICE:BOB;
   parties[1] = party == BOB ? BOB:ALICE;
   
-  cout<< parties[0] << ", " << parties[1] << endl;
   
-  subSystem *subsystem = new subSystem( parties );
-  Cloud *cloud = new Cloud( parties );
+  
+  subSystem *subsystem = new subSystem( parties, integer_bits );
+  Cloud *cloud = new Cloud( parties, integer_bits );
 
   // client offline
   
@@ -114,7 +123,7 @@ int main(int argc, char **argv) {
   // Control loop
 
   
-  for (k = 0; k < 1; k++) {
+  for (k = 0; k < 10; k++) {
     if (k > 0){
       cloud->predict();
       cloud->computexHat(subsystem->zk);

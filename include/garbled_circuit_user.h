@@ -3,9 +3,9 @@
 #include "fixedPoint.h"
 class garbled_circuit_user{
     public:
-      int decimalBits = 24;
-      int integerBits = decimalBits;
-      int totalBits = decimalBits + integerBits;
+      int decimalBits;
+      int integerBits;
+      int totalBits;
     // Computes the multiplication between matrices A and B
 
   garbled_circuit_user() {}

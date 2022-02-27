@@ -20,12 +20,16 @@ public:
   Bit *bits;
   // Integer val;
   int length = 0;
-  int decimalBits = 24;
-  int totalBits = 2*decimalBits;
+  int decimalBits; // TODO: Fix this: when some variables are created such as u[k] they never see the size sooo. May this function inherits from another? it seems like a dirty solution
+  int integerBits;
+  int totalBits;
   int party;
 
   // Class initializer
   fixedPoint(double input, int fractLen, int intLen, int partyIn = PUBLIC) {
+    decimalBits = fractLen;
+    integerBits = intLen;
+    totalBits = decimalBits + integerBits;
     length = fractLen + intLen;
     bits = new Bit[length];
     party = partyIn;
@@ -37,6 +41,9 @@ public:
     length = in.length;
     party = in.party;
     bits = new Bit[length];
+    decimalBits = in.decimalBits;
+    integerBits = in.integerBits;
+    totalBits = in.totalBits;
     memcpy(bits, in.bits, sizeof(Bit) * length);
   }
 

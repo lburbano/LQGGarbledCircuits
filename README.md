@@ -14,20 +14,20 @@ $ make
 ### Scenario 1: System garbler
 Terminal 1
 ```
-./bin/system 1 12345
+./bin/system 1 12345 [nbits]
 ```
 
 Terminal 2
 ```
-./bin/cloud 2 12345
+./bin/cloud 2 12345 [nbits]
 ```
 ### Scenario 2: Cloud garbler
 Terminal 1
 ```
-./bin/system 2 12345
+./bin/system 2 12345 [nbits]
 ```
 
 Terminal 2
 ```
-./bin/cloud 1 12345
+./bin/cloud 1 12345 [nbits]
 ```

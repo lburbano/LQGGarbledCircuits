@@ -44,10 +44,12 @@ public:
 
   
 
-  Cloud(int *parties) {
+  Cloud(int *parties, int integer_bits) {
     this->parties[0] = parties[0];
     this->parties[1] = parties[1];
-
+    this->integerBits = integer_bits;
+    this->decimalBits = integer_bits;
+    this->totalBits = integerBits + decimalBits;
   }
 
   // class receives matrices to compute the controller and the anomaly detection
