@@ -102,17 +102,26 @@ public:
   
 
   // Reveals the value of u[k] to the system
-  void measureState(fixedPoint **uk) {
+  float measureState(fixedPoint **uk) {
+    auto measure_init = high_resolution_clock::now();
     for (int i = 0; i < this->sizeur[0]; i++) 
       for (int j = 0; j < this->sizeur[1]; j++) 
         uk[i][j].reveal<double>(parties[0]);
+    auto measure_end = high_resolution_clock::now();
+    auto reveal_u_time = std::chrono::duration_cast<std::chrono::microseconds>(measure_end - measure_init).count();
     
+    return reveal_u_time;
   }
 
   // Creates z[k] to be used by the emp library.
   // Value is set to zero since the cloud party does not have the plaintext of z[k]
-  void computezk() {
+  float computezk() {
+    auto init = high_resolution_clock::now();
     setZero_GC( this->zk, this->sizezk, parties[0]);
+    auto end = high_resolution_clock::now();
+    auto label_generation = std::chrono::duration_cast<std::chrono::microseconds>(end - init).count();
+    
+    return label_generation;
   }
 
   // Creates a representation of the constants related to the controller to be used with the emp toolkit
@@ -139,9 +148,7 @@ public:
     setData_GC(this->gamma1, this->gamma1_ne, this->sizegamma1, parties[1]);
     setData_GC(this->gamma2, this->gamma2_ne, this->sizegamma2, parties[1]);
     setData_GC(this->gamma3, this->gamma3_ne, this->sizegamma3, parties[1]);
-    setData_GC(this->A_BK, this->A_BK_ne, this->sizeA, parties[1]);
-    
-    
+    setData_GC(this->A_BK, this->A_BK_ne, this->sizeA, parties[1]);    
   }
 
   // Creates a representation of the constants related to references to be used with the emp toolkit
@@ -207,7 +214,7 @@ public:
      
   }
 
-  void computeReferenceConstants() {
+  float computeReferenceConstants() {
     this->sizeuTilder[0] = sizeur[0];
     this->sizeuTilder[1] = sizeur[1];
     this->sizexgamma[0] = sizexr[0];
@@ -215,25 +222,20 @@ public:
 
     this->uTilder = initSize_GC( this->sizeuTilder );
     this->xgamma  = initSize_GC( this->sizexgamma );
+    fixedPoint **gamma2xr = initSize_GC( this->sizegamma2 );
+    fixedPoint **gamma3ur = initSize_GC( this->sizegamma3 );
     
 
     fixedPoint **Kxr = new fixedPoint *[this->sizeK[0]];
     for (int i = 0; i < this->sizeK[0]; i++) {
       Kxr[i] = new fixedPoint[this->sizexr[1]];
     } 
+    auto init = high_resolution_clock::now();
     matrixMul(this->K, this->xr, Kxr, this->sizeK, this->sizexr);
     for (int i = 0; i < this->sizeuTilder[0]; i++) {
       for (int j = 0; j < this->sizeuTilder[1]; j++) {
         this->uTilder[i][j] = this->ur[i][j] + Kxr[i][j];
       }
-    }
-    fixedPoint **gamma2xr = new fixedPoint *[this->sizegamma2[0]];
-    for (int i = 0; i < this->sizegamma2[0]; i++) {
-      gamma2xr[i] = new fixedPoint[this->sizexr[1]];
-    }
-    fixedPoint **gamma3ur = new fixedPoint *[this->sizegamma3[0]];
-    for (int i = 0; i < this->sizegamma3[0]; i++) {
-      gamma3ur[i] = new fixedPoint[this->sizeur[1]];
     }
 
     matrixMul(this->gamma2, this->xr, gamma2xr, this->sizegamma2, this->sizexr);
@@ -245,6 +247,13 @@ public:
     }
     // compute B u_{\Gamma}
     matrixMul(this->B, this->uTilder, this->Bug, this->sizeB, this->sizeuTilder);
+    auto end = high_resolution_clock::now();
+    auto reference_constant = std::chrono::duration_cast<std::chrono::microseconds>(end - init).count();
+    
+    delete[] gamma2xr;
+    delete[] gamma3ur;
+    delete[] Kxr;
+    return reference_constant;
   }
 
 
@@ -265,7 +274,7 @@ Functions required for the operations. Not focused on the control system
       this->A[i] = new fixedPoint[this->sizeA[1]];
     }
     */
-    string data_folder = "../Data/";
+    string data_folder = "Data/";
     // Load system matrices A, B, C, K, L
     this->A_ne  = init_size_file( data_folder + "A.txt", this->sizeA);
     this->B_ne  = init_size_file( data_folder + "B.txt", this->sizeB);

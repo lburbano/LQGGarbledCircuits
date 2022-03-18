@@ -7,8 +7,9 @@ To build this project, follow the next steps:
 ```
 $ mkdir build
 $ cd build
-$ cmake ..
+$ cmake -DCMAKE_BUILD_TYPE=release ..
 $ make
+$ cd ..
 ```
 ## Running 
 ### Scenario 1: System garbler

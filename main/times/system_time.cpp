@@ -68,23 +68,22 @@ int main(int argc, char **argv) {
   int port, party;
   parse_party_and_port(argv, &party, &port);
   int niter = atoi( argv[3] );
-  int integer_bits = atoi( argv[4] );
-  if (integer_bits % 1 != 0 || integer_bits > 48){
-    cout << "Number of bits should be even and less than 48" <<endl;
+  int integer_bits = atoi( argv[4] ) / 2;
+  if (integer_bits % 1 != 0)
+  {
+    cout << "Number of bits should be even" <<endl;
     return 0;
   }
-  integer_bits = integer_bits / 2;
   
   NetIO *io = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port);
   setup_semi_honest(io, party);
-  bool print = 0;
+  bool print = 1;
 
-  
+
   int parties[2];
   parties[0] = party == ALICE ? ALICE:BOB;
   parties[1] = party == ALICE ? BOB:ALICE;
 
-    
   
  
  
@@ -121,27 +120,82 @@ int main(int argc, char **argv) {
   }
   cout << endl;
   // Control loop
-
-
+  cout << "Reveal U" << ", ";
+  cout << "New Labels" << ", ";
+  cout << "totalTime" << ", ";
+  cout << "predictionTime" << ", ";
+  cout << "estimationTime" << ", ";
+  cout << "residuesTime" << ", ";
+  cout << "controlTime" << ", ";
+  cout << "cusumTime" << ", ";
+  cout << "revealAlarm" << ", ";    
+  cout << endl;
   
+  auto init = high_resolution_clock::now();
+  auto predictT = high_resolution_clock::now();
+  auto estimateT = high_resolution_clock::now();
+  auto residuesT = high_resolution_clock::now();
+  auto ukT = high_resolution_clock::now();
+  auto cusumT = high_resolution_clock::now();
+  auto simT = high_resolution_clock::now();
+  auto newLabelsT = high_resolution_clock::now();
+  auto end = high_resolution_clock::now();
   for (k = 0; k < niter; k++) {
-
+    init = high_resolution_clock::now();
     if (k > 0){
       cloud->predict();
+      predictT = high_resolution_clock::now();
+
       cloud->computexHat(subsystem->zk);
+      estimateT = high_resolution_clock::now();
     }
+    
     cloud->computeuk();
+    ukT = high_resolution_clock::now();
+
+
     cloud->computeResidues(subsystem->zk);
+    residuesT = high_resolution_clock::now();
+
     cloud->computeCusum();
+    cusumT = high_resolution_clock::now();
+
     subsystem->measureState(cloud->uk);
+    simT = high_resolution_clock::now();
+
+
     subsystem->computezk();
-    if (print) 
-      print_rest(cloud, subsystem, parties[0], k+1);
+    newLabelsT = high_resolution_clock::now();
+
     cloud->reveal_alarm( PUBLIC );
+    end = high_resolution_clock::now();
+
+
+    auto totalTime      = std::chrono::duration_cast<std::chrono::microseconds>(end       - init).count();
+    auto predictionTime = std::chrono::duration_cast<std::chrono::microseconds>(predictT  - init).count();
+    auto estimationTime = std::chrono::duration_cast<std::chrono::microseconds>(estimateT - predictT).count();
+    auto controlTime    = std::chrono::duration_cast<std::chrono::microseconds>(ukT       - estimateT).count();
+    auto residuesTime   = std::chrono::duration_cast<std::chrono::microseconds>(residuesT - ukT).count();
+    auto cusumTime      = std::chrono::duration_cast<std::chrono::microseconds>(cusumT    - residuesT).count();
+    auto revealAlarm    = std::chrono::duration_cast<std::chrono::microseconds>(end   - newLabelsT).count();
+    
+
+    cout << totalTime << ", ";
+    cout << predictionTime << ", ";
+    cout << estimationTime << ", ";
+    cout << residuesTime << ", ";
+    cout << controlTime << ", ";
+    cout << cusumTime << ", ";
+    cout << revealAlarm << ", ";
+    cout << endl;
+    
+    if (print) 
+      print_rest( cloud, subsystem, parties[0], k+1);
+    
     
   }
   cout << "Finished" << endl;
   
   delete io;
-  return 0; 
+  return 0;
 }

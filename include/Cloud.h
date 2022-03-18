@@ -203,14 +203,14 @@ public:
   void computeCusum()//fixedPoint **xHat, fixedPoint **uk)
   {
     Bit *clipBelow = new Bit[this->sizeCusum[0]]; 
-    Bit zero(0, parties[0]);                                      // Should we change this?
-                                                             // Maybe this should be a parameter of the function
-                                                             // cloud should learn nothing about this value
+    // Bit zero(0, parties[0]);
+    Bit zero(0, PUBLIC);
     for (int i = 0; i < this->sizeCusum[0]; i++) {
       
       if(this->HARD_CODE_ZEROES == 1){
         if(this->alarm_ne[i][0] == 1){
-          this->Cusum[i][0] = fixedPoint(0, this->decimalBits, this->integerBits, parties[0]);
+          // this->Cusum[i][0] = fixedPoint(0, this->decimalBits, this->integerBits, parties[0]);
+          this->Cusum[i][0] = fixedPoint(0, this->decimalBits, this->integerBits, PUBLIC);
           this->alarm[i][0] = zero;
         } else{
           this->Cusum[i][0] = this->Cusum[i][0] + this->residues[i][0] - this->nu[i][0];

@@ -105,11 +105,15 @@ public:
   // Simulates one time step of the system given the control action u[k]
   // TODO: change name. This is a simulation of the system evolution, not a measurement
   //       add noise
-  void measureState(fixedPoint **uk) {
+  float measureState(fixedPoint **uk) {
+    auto revealU_init = high_resolution_clock::now();
     for (int i = 0; i < this->sizeur[0]; i++) 
       for (int j = 0; j < this->sizeur[1]; j++) 
         this->uk_ne[i][j] = uk[i][j].reveal<double>( parties[0] );
+    auto revealU_end = high_resolution_clock::now();
+    auto revealU_time = std::chrono::duration_cast<std::chrono::microseconds>(revealU_end - revealU_init).count();
     
+
     double *AxkIn = new double[this->sizeA[0]];
     double *Buk = new double[this->sizeB[0]];
     // Compute A*x, B*u 
@@ -121,13 +125,18 @@ public:
     }
     delete[] AxkIn;
     delete[] Buk;
+    return revealU_time;
   }
 
   // Computes the measurements y[k] 
   // Updates zk to use it in the emp library for the next iteration
-  void computezk() {
+  float computezk() {
     matrixMulNE(this->C_ne, this->xk_ne, this->zk_ne, this->sizeC, this->sizexk);
+    auto init_new_labels = high_resolution_clock::now();
     setData_GC( this->zk, zk_ne, this->sizezk, parties[0] );
+    auto end_new_labels = high_resolution_clock::now();
+    auto label_generation = std::chrono::duration_cast<std::chrono::microseconds>(end_new_labels - init_new_labels).count();
+    return label_generation;
   }
 
   // Computes the gamma matrices in plaintext.
@@ -175,7 +184,7 @@ public:
   // Assumes that the constants are already computed in plaintext
   void garbleControlConstants(  ) {
     // gamma3
-    // Puts data to cloud's secrets
+    // Puts data into cloud's secrets
     setZero_GC( this->K,   this->sizeK, parties[1]);
     setZero_GC( this->L,   this->sizeL, parties[1]);
     setZero_GC( this->B,   this->sizeB, parties[1]);
@@ -204,7 +213,7 @@ public:
 
   // Computes the constants related to the system references.
   // It also computes in plaintext matrices to compute the prediction
-  void computeReferenceConstants() {
+  float computeReferenceConstants() {
     this->sizeuTilder[0] = sizeur[0];
     this->sizeuTilder[1] = sizeur[1];
     this->sizexgamma[0] = sizexr[0];
@@ -212,27 +221,21 @@ public:
 
     this->uTilder = initSize_GC( this->sizeuTilder );
     this->xgamma  = initSize_GC( this->sizexgamma );
-    
+    fixedPoint **gamma2xr = initSize_GC( this->sizegamma2 );
+    fixedPoint **gamma3ur = initSize_GC( this->sizegamma3 );
 
     fixedPoint **Kxr = new fixedPoint *[this->sizeK[0]];
     for (int i = 0; i < this->sizeK[0]; i++) {
       Kxr[i] = new fixedPoint[this->sizexr[1]];
     } 
+
+    auto init = high_resolution_clock::now();
     matrixMul(this->K, this->xr, Kxr, this->sizeK, this->sizexr);
     for (int i = 0; i < this->sizeuTilder[0]; i++) {
       for (int j = 0; j < this->sizeuTilder[1]; j++) {
         this->uTilder[i][j] = this->ur[i][j] + Kxr[i][j];
       }
     }
-    fixedPoint **gamma2xr = new fixedPoint *[this->sizegamma2[0]];
-    for (int i = 0; i < this->sizegamma2[0]; i++) {
-      gamma2xr[i] = new fixedPoint[this->sizexr[1]];
-    }
-    fixedPoint **gamma3ur = new fixedPoint *[this->sizegamma3[0]];
-    for (int i = 0; i < this->sizegamma3[0]; i++) {
-      gamma3ur[i] = new fixedPoint[this->sizeur[1]];
-    }
-
     matrixMul(this->gamma2, this->xr, gamma2xr, this->sizegamma2, this->sizexr);
     matrixMul(this->gamma3, this->ur, gamma3ur, this->sizegamma3, this->sizeur);
     for (int i = 0; i < this->sizexgamma[0]; i++) {
@@ -242,6 +245,13 @@ public:
     }
     // compute B u_{\Gamma}
     matrixMul(this->B, this->uTilder, this->Bug, this->sizeB, this->sizeuTilder);
+    auto end = high_resolution_clock::now();
+    auto reference_constant = std::chrono::duration_cast<std::chrono::microseconds>(end - init).count();
+    
+    delete[] gamma2xr;
+    delete[] gamma3ur;
+    delete[] Kxr;
+    return reference_constant;
   }
 
   // Creates a representation of the constants related to references to be used with the emp toolkit
@@ -271,7 +281,7 @@ public:
   // loads all the matrices required to compute the controller
   // and to simulate the system behavior
   void inputData(  ) {
-    string data_folder = "../Data/";
+    string data_folder = "Data/";
     // Initializes matrices A, B, C, x0, y0, xr, ur, tau, nu
     this->A_ne     = init_size_file( data_folder + "A.txt", this->sizeA);
     this->B_ne     = init_size_file( data_folder + "B.txt", this->sizeB);

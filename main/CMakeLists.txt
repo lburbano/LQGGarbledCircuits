@@ -18,3 +18,5 @@ endmacro()
 # Test cases
 add_test_case_with_run(cloud)
 add_test_case_with_run(system)
+add_test_case_with_run(cloud_time)
+add_test_case_with_run(system_time)

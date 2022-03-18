@@ -1,0 +1,23 @@
+#!/bin/bash
+nbits=(32 48)
+niter=(0 1 2)
+folders=("y10_u2" "y50_u10" "y250_u50")
+for folder in ${folders[@]}; do
+	rm -r Data
+	cp -r all_data/${folder} ./Data
+	tree ./Data
+	for j in ${niter[@]}; do
+		for i in ${nbits[@]}; do
+			(build/bin/system 1 12345 $j $i) & (sleep 0.1; build/bin/cloud 2 12345 $j $i)
+			mv callgrind* ./results/${i}_bit/system_generator/${folder}/
+			pause 5
+		done
+	done
+	for j in ${niter[@]}; do
+		for i in ${nbits[@]}; do
+			(build/bin/system 2 12345 $j $i) & (sleep 0.1; build/bin/cloud 1 12345 $j $i)
+			mv callgrind* ./results/${i}_bit/system_evaluator/${folder}/
+			pause 5
+		done
+	done
+done

@@ -2,3 +2,6 @@
 /.vscode
 /.vs
 CMakePresets.json
+/results
+*.csv
+communication_prof.py

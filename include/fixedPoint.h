@@ -20,7 +20,7 @@ public:
   Bit *bits;
   // Integer val;
   int length = 0;
-  int decimalBits; // TODO: Fix this: when some variables are created such as u[k] they never see the size sooo. May this function inherits from another? it seems like a dirty solution
+  int decimalBits; 
   int integerBits;
   int totalBits;
   int party;
