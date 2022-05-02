@@ -1,41 +1,44 @@
 #!/bin/bash
 nbits=(32 48)
 niter=(0 1 2)
-folders=("y10_u2" "y50_u10" "y250_u50")
+folders=("y10_u2" "y20_u4" "y50_u10")
+for iteration in {41..60}; do
 for folder in ${folders[@]}; do
 	rm -r Data
 	cp -r all_data/${folder} ./Data
 	tree ./Data
-
 	for j in ${niter[@]}; do
 		for i in ${nbits[@]}; do
 			tcpdump -U -i lo -w captura_system_generator_bit_${i}_iter_${j}.pcap port 12345 & sleep 5
 			sleep 0.2
 			(build/bin/system 1 12345 $j $i & sleep 0.1; build/bin/cloud 2 12345 $j $i)
 			
+			sleep 3
 			pid=$(ps -e | pgrep tcpdump)  
-			echo $pid  
-			#interrupt it:  
-			sleep 100
-			kill -2 $pid
-			mv captura* ./results/communication/${i}_bit/system_generator/${folder}/
-			sleep 5
+			kill -2 $pid			
+			mkdir results/communication/${i}_bit/system_generator/${folder}/iteration_${iteration}
+			mv captura* ./results/communication/${i}_bit/system_generator/${folder}/iteration_${iteration}
+			sleep 0.5
 		done
 	done
 	for j in ${niter[@]}; do
 		for i in ${nbits[@]}; do
 			tcpdump -U -i lo -w captura_system_evaluator_bit_${i}_iter_${j}.pcap port 12345 & sleep 5
 			sleep 0.2
-			(build/bin/system 2 12345 $j $i & sleep 0.1; build/bin/cloud 1 12345 $j $i)
+			(build/bin/cloud 1 12345 $j $i & sleep 0.1; build/bin/system 2 12345 $j $i)
 			
+			sleep 3
 			pid=$(ps -e | pgrep tcpdump)  
-			echo $pid  
-			#interrupt it:  
-			sleep 100
-			kill -2 $pid
-			mv captura* ./results/communication/${i}_bit/system_evaluator/${folder}/
-			sleep 0.1
+			kill -2 $pid			
+			mkdir results/communication/${i}_bit/system_evaluator/${folder}/iteration_${iteration}
+			mv captura* ./results/communication/${i}_bit/system_evaluator/${folder}/iteration_${iteration}
+			sleep 0.5
 		done
 	done
 	
 done
+done
+
+pause 10
+
+python3 get_communication_data.py

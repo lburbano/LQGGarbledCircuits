@@ -97,6 +97,7 @@ class garbled_circuit_user{
       }
       i++;
     }
+    file.close();
   }
   
   // Initialize variables used for Garbled Circuits

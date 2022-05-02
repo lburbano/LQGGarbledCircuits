@@ -22,17 +22,8 @@ def run_commands(bits, iterations, destiny):
         # System is the garbler and cloud is the evaluator
         for j in range(iterations):
             # Compute program n times
-            command = f'build/bin/profile_system_time_system 1 12345 100 {b}  > {destiny}times_system_garbler_{b}_{j}.csv'
-            command2 = f'build/bin/profile_system_time_cloud 2 12345 100 {b}'
-            execute_commands(command, command2)
-            
-            
-        
-        # System is the evaluator and cloud is the garbler
-        for j in range(iterations):
-            # Compute program n times
-            command =  f'build/bin/profile_cloud_time_system 2 12345 100 {b}'
-            command2 = f'build/bin/profile_cloud_time_cloud 1 12345 100 {b} > {destiny}times_cloud_garbler_{b}_{j}.csv'
+            command = f'build/bin/cloud_hybrid 1 12345 100 {b}  > {destiny}times_hybrid_{b}_{j}.csv'
+            command2 = f'build/bin/system_hybrid 2 12345 100 {b}'
             execute_commands(command, command2)
 
 def execute_commands(cm1, cm2):
@@ -95,39 +86,32 @@ def write_results(row, averages, csvwriter):
 
 def write_results_in_file(direc, data_directory):
 
-    system_generator_48_averages_offline, system_generator_48_averages_online = calculate_averages('times_system_garbler_48',direc)
-    cloud_generator_48_averages_offline, cloud_generator_48_averages_online = calculate_averages('times_cloud_garbler_48',direc)
+    cloud_hybrid_48_averages_offline, cloud_hybrid_48_averages_online = calculate_averages('times_hybrid_48',direc)
     
-    system_generator_32_averages_offline, system_generator_32_averages_online = calculate_averages('times_system_garbler_32',direc)
-    cloud_generator_32_averages_offline, cloud_generator_32_averages_online = calculate_averages('times_cloud_garbler_32',direc)
+    cloud_hybrid_32_averages_offline, cloud_hybrid_32_averages_online = calculate_averages('times_hybrid_32',direc)
     
-    row1 = ['System Generator (48 bits)']
-    row4 = ['Cloud Generator (48 bits)']
+    row1 = ['System Evaluator (48 bits)']
     
-    row5 = ['System Generator (32 bits)']
-    row8 = ['Cloud Generator (32 bits)']
+    row5 = ['System Evaluator (32 bits)']
     
-    results = ''.join((data_directory, '_results.csv'))
+    results = ''.join((data_directory, '_hybrid_results.csv'))
     with open(results, 'w', newline='') as csvfile:
     
-        fields_offline = ['', 'Generate labels', 'Compute constants', 'Total Time']
+        fields_offline = ['', 'Generate labels (us)', 'Compute constants (us)', 'Total Time (us)']
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(fields_offline)
         
-        write_results(row1, system_generator_48_averages_offline, csvwriter)
-        write_results(row4, cloud_generator_48_averages_offline, csvwriter)
+        write_results(row1, cloud_hybrid_48_averages_offline, csvwriter)
         
-        write_results(row5, system_generator_32_averages_offline, csvwriter)
-        write_results(row8, cloud_generator_32_averages_offline, csvwriter)    
+        write_results(row5, cloud_hybrid_32_averages_offline, csvwriter)
         
-        fields_online = ['', 'Time', 'Total Time']
+        fields_online = ['', 'Time (us)', 'Total Time (us)']
         csvwriter.writerow(fields_online)
         
-        write_results(row1, system_generator_48_averages_online, csvwriter)
-        write_results(row4, cloud_generator_48_averages_online, csvwriter)
+        write_results(row1, cloud_hybrid_48_averages_online, csvwriter)
         
-        write_results(row5, system_generator_32_averages_online, csvwriter)
-        write_results(row8, cloud_generator_32_averages_online, csvwriter)
+        write_results(row5, cloud_hybrid_32_averages_online, csvwriter)
+        
 
 
 

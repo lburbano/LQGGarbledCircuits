@@ -25,31 +25,43 @@ void print_init(Cloud *cloud, subSystem *subsystem, int party, int k) {
   cout << endl << endl;
 }
 
-void print_rest( Cloud *cloud, subSystem *subsystem, int party, int k) {
-  for (int i = 0; i < subsystem->sizezk[0]; i++) {
-    for (int j = 0; j < subsystem->sizezk[1]; j++) {
-      cout << subsystem->zk_ne[i][j] << ", ";
-    }
-  }
+void print_rest(Cloud *cloud, subSystem *subsystem, int party, int k) {
+  cout << endl << endl;
+  cout << "u" << k << ":  " << endl;
   for (int i = 0; i < cloud->sizeuk[0]; i++) {
     for (int j = 0; j < cloud->sizeuk[1]; j++) {
       cout << cloud->uk[i][j].reveal<double>(party) << ", ";
     }
+    cout << endl;
   }
+  cout << endl << endl;
+  cout << "z" << k << ":  " << endl;
+  for (int i = 0; i < subsystem->sizezk[0]; i++) {
+    for (int j = 0; j < subsystem->sizezk[1]; j++) {
+      cout << subsystem->zk[i][j].reveal<double>(party) << ", " << subsystem->zk_ne[i][j] << ", ";
+    }
+    cout << endl;
+  }
+  cout << endl << endl;
+  cout << "s" << k << ":  " << endl;
   for (int i = 0; i < cloud->sizeCusum[0]; i++) {
     for (int j = 0; j < cloud->sizeCusum[1]; j++) {
       cout << cloud->Cusum[i][j].reveal<double>(party) << ", ";
     }
+    cout << endl;
   }
+  cout << endl << endl;
+
+  cout << "Alarms: k=" << k << ":  " << endl;
   for (int i = 0; i < cloud->sizeyp[0]; i++) {
     if(cloud->HARD_CODE_ZEROES == 1){
-      // cout << cloud->alarm_ne[i][0] << ", "; 
-      cout << cloud->alarm[i][0].reveal(PUBLIC) << ", "; 
+      cout << cloud->alarm_ne[i][0] << ", "; 
     }else{
      cout << cloud->alarm[i][0].reveal(PUBLIC) << ", "; 
     }
+    cout << endl;
   }
-  cout << endl;
+  cout << endl << endl;
 }
 
 int main(int argc, char **argv) {
@@ -57,7 +69,7 @@ int main(int argc, char **argv) {
   parse_party_and_port(argv, &party, &port);
   int niter = atoi( argv[3] );
   int integer_bits = atoi( argv[4] );
-  if (integer_bits % 1 != 0 || integer_bits > 64){
+  if (integer_bits % 1 != 0 || integer_bits > 48){
     cout << "Number of bits should be even and less than 48" <<endl;
     return 0;
   }
@@ -65,20 +77,28 @@ int main(int argc, char **argv) {
   
   NetIO *io = new NetIO(party == ALICE ? nullptr : "127.0.0.1", port);
   setup_semi_honest(io, party);
-  bool print = 1;
+  bool print = 0;
   
   int parties[2];
   parties[0] = party == ALICE ? ALICE:BOB;
   parties[1] = party == ALICE ? BOB:ALICE;
-  cout << fixed << setprecision(10) ;
+
   
+  
+  
+  
+ 
+ 
   subSystem *subsystem = new subSystem( parties, integer_bits );
   Cloud *cloud = new Cloud( parties, integer_bits );
+  
 
   // Loads data related to controller and system
   subsystem->inputData(  );
   // Computes controller matrices 
   subsystem->garbleControlConstants(  );
+
+
   subsystem->computeReferenceConstants();
   
 
@@ -101,42 +121,26 @@ int main(int argc, char **argv) {
   int k = 0;
 
   if (print) {
-    
-    for(int i=0; i<subsystem->sizezk[0]; i++){
-      cout << "y_" << i << ",";
-    }
-    for(int i=0; i<subsystem->sizeuk[0]; i++){
-      cout << "u_" << i << ",";
-    }
-    for(int i=0; i<subsystem->sizezk[0]; i++){
-      cout << "S_" << i << ",";
-    }
-    cout << endl;
-    // print_rest(cloud, subsystem, parties[0], k);
+    print_init(cloud, subsystem, parties[0], k);
   }
-  
+  cout << endl;
   // Control loop
 
 
   
   for (k = 0; k < niter; k++) {
-    subsystem->computezk(k);
+    
+    subsystem->computezk( k );
     if (k > 0){
       cloud->predict();
       cloud->computexHat(subsystem->zk);
     }
-    
     cloud->computeuk();
-    if (print) 
-      print_rest(cloud, subsystem, parties[0], k);
     cloud->computeResidues(subsystem->zk);
     cloud->computeCusum();
     subsystem->measureState(cloud->uk, k);
     cloud->reveal_alarm( PUBLIC );
-    
-    
   }
-  
   cout << "Finished" << endl;
   
   delete io;

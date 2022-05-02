@@ -24,6 +24,7 @@ public:
   int integerBits;
   int totalBits;
   int party;
+  double multiplier;
 
   // Class initializer
   fixedPoint(double input, int fractLen, int intLen, int partyIn = PUBLIC) {
@@ -33,6 +34,7 @@ public:
     length = fractLen + intLen;
     bits = new Bit[length];
     party = partyIn;
+    multiplier = pow(2, decimalBits);
     to_binary(input, bits, length, party);
   }
 
@@ -44,6 +46,7 @@ public:
     decimalBits = in.decimalBits;
     integerBits = in.integerBits;
     totalBits = in.totalBits;
+    multiplier = in.multiplier;
     memcpy(bits, in.bits, sizeof(Bit) * length);
   }
 
@@ -60,7 +63,7 @@ public:
     string str, bin;
     int temp = 0;
     str = to_string(num);
-    bin = std::bitset<24>(num).to_string();
+    bin = std::bitset<32>(num).to_string();
     
     reverse(bin.begin(), bin.end());
     int l = (bin.size() > (size_t)len ? len : bin.size());
@@ -94,6 +97,7 @@ public:
       b[i] = 0;
       b[i+decimalBits] = (intPart<0? 1: 0);
     }
+    x = round(x * multiplier)/multiplier;
     if(x < 0){
       intPart = floor(x);
       if (intPart != x){
@@ -101,7 +105,10 @@ public:
       }
     }
     bool_dat(b, decimalBits, (long long)intPart, decimalBits);
-    bool_dat(b, decimalBits, (long long)round(fractPart * (pow(2,decimalBits)-1) ), 0);
+    fractPart = round( fractPart* multiplier );
+    fractPart = (fractPart > multiplier-1)? multiplier-1:fractPart;
+    
+    bool_dat(b, decimalBits, (long long)fractPart, 0);
     in_it(dest, b, totalBits, party);
   }
   
@@ -318,8 +325,8 @@ template <> double fixedPoint::reveal<double>(int party) {
   }
 
   wholenum = to_string(stoi(wholenum, nullptr, 2) - i);
-  fraction = to_string(std::stoi(fraction, nullptr, 2));
-  result = stod(wholenum) + stod(fraction) / (pow(2, decimalBits)-1);
+  fraction = to_string(std::stol(fraction, nullptr, 2)); // stol instead of stoi for a better precision
+  result = stod(wholenum) + stod(fraction) / (multiplier);
 
   delete[] integers;
   delete[] decimals;

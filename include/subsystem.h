@@ -91,6 +91,10 @@ public:
   int sizeuk[2];
   fixedPoint **yp;
   int parties[2];
+  double **process_noise;
+  int size_process_noise[2];
+  double **sensor_noise;
+  int size_sensor_noise[2];
 
   subSystem(int *parties, int integer_bits) {
     this->parties[0] = parties[0];
@@ -105,7 +109,7 @@ public:
   // Simulates one time step of the system given the control action u[k]
   // TODO: change name. This is a simulation of the system evolution, not a measurement
   //       add noise
-  float measureState(fixedPoint **uk) {
+  float measureState(fixedPoint **uk, int k) {
     auto revealU_init = high_resolution_clock::now();
     for (int i = 0; i < this->sizeur[0]; i++) 
       for (int j = 0; j < this->sizeur[1]; j++) 
@@ -121,7 +125,7 @@ public:
     matrixVecMulNE(this->B_ne, this->uk_ne, Buk, this->sizeB);
     // Compute the state A*x+B*u
     for (int i = 0; i < this->sizeA[0]; i++) {
-      this->xk_ne[i][0] = AxkIn[i] + Buk[i] /*+ wk[i][0]*/;
+      this->xk_ne[i][0] = AxkIn[i] + Buk[i]  /*+ this->process_noise[k][i]*/;
     }
     delete[] AxkIn;
     delete[] Buk;
@@ -130,10 +134,24 @@ public:
 
   // Computes the measurements y[k] 
   // Updates zk to use it in the emp library for the next iteration
-  float computezk() {
+  float computezk(int k) {
     matrixMulNE(this->C_ne, this->xk_ne, this->zk_ne, this->sizeC, this->sizexk);
+    for(int i=0; i< this->sizezk[0]; i++){
+      this->zk_ne[i][0] = this->zk_ne[i][0] /*+ this->sensor_noise[k][i]*/;
+    }
     auto init_new_labels = high_resolution_clock::now();
-    setData_GC( this->zk, zk_ne, this->sizezk, parties[0] );
+    // for(int i=0; i<this->sizezk[0]; i++){ // This is used to inject an attack. Delete before push
+    //   for(int j=0; j<this->sizezk[1]; j++){
+    //     if(k>80 && k<83 && i == 4){
+    //       this->zk_ne[i][j] = this->zk_ne[i][j] + 4;
+    //       this->zk[i][j] = fixedPoint(this->zk_ne[i][j], integerBits, decimalBits, parties[0]);
+    //     }else{
+    //       this->zk[i][j] = fixedPoint(this->zk_ne[i][j], this->integerBits, this->decimalBits, this->parties[0]);
+    //     }
+    //   }
+    // }
+    setData_GC(this->zk, this->zk_ne, this->sizezk, this->parties[0] );
+    
     auto end_new_labels = high_resolution_clock::now();
     auto label_generation = std::chrono::duration_cast<std::chrono::microseconds>(end_new_labels - init_new_labels).count();
     return label_generation;
@@ -194,7 +212,6 @@ public:
     
     
     // Puts data into system's secrets
-    setData_GC( this->zk,    this->xk_ne,    this->sizezk, parties[0] );  
     setData_GC( this->xk,    this->xk_ne,    this->sizezk, parties[0] );
     setData_GC( this->xr,    this->xr_ne,    this->sizexr, parties[0] );
     setData_GC( this->ur,    this->ur_ne,    this->sizeur, parties[0] );
@@ -231,6 +248,9 @@ public:
 
     auto init = high_resolution_clock::now();
     matrixMul(this->K, this->xr, Kxr, this->sizeK, this->sizexr);
+
+    
+
     for (int i = 0; i < this->sizeuTilder[0]; i++) {
       for (int j = 0; j < this->sizeuTilder[1]; j++) {
         this->uTilder[i][j] = this->ur[i][j] + Kxr[i][j];
@@ -291,6 +311,15 @@ public:
     this->xHatk_ne = init_size_file( data_folder + "x0.txt", this->sizexHatk);
     this->ur_ne    = init_size_file( data_folder + "ur.txt", this->sizeur);
     this->xr_ne    = init_size_file( data_folder + "xr.txt", this->sizexr);
+
+    // TODO: Easy fix for noise. Delete this before pushing
+    // To fix this, I have to find a way to produce multivariate random numbers...
+    // [k][sensor_number]
+    // this->process_noise = init_size_file( data_folder + "process_noise.txt", this->size_process_noise);
+    // this->sensor_noise  = init_size_file( data_folder + "sensor_noise.txt",  this->size_sensor_noise);
+    // readFile(this->process_noise, data_folder + "process_noise.txt", this->size_process_noise);
+    // readFile(this->sensor_noise, data_folder + "sensor_noise.txt", this->size_sensor_noise);
+
     
     // this->Tau_ne = init_size_file( data_folder + "Tau.txt", this->sizeTau);
     // this->Nu_ne  = init_size_file( data_folder + "Nu.txt", this->sizeNu);

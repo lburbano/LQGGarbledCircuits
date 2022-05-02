@@ -209,8 +209,8 @@ public:
       
       if(this->HARD_CODE_ZEROES == 1){
         if(this->alarm_ne[i][0] == 1){
-          // this->Cusum[i][0] = fixedPoint(0, this->decimalBits, this->integerBits, parties[0]);
-          this->Cusum[i][0] = fixedPoint(0, this->decimalBits, this->integerBits, PUBLIC);
+          this->Cusum[i][0] = fixedPoint(0, this->decimalBits, this->integerBits, parties[0]);
+          // this->Cusum[i][0] = fixedPoint(0, this->decimalBits, this->integerBits, PUBLIC);
           this->alarm[i][0] = zero;
         } else{
           this->Cusum[i][0] = this->Cusum[i][0] + this->residues[i][0] - this->nu[i][0];
@@ -242,6 +242,7 @@ public:
   void computeuk() {
     fixedPoint *kxHat = new fixedPoint[this->sizeK[0]];
     matrixVecMul(this->K, this->xHatk, kxHat, this->sizeK);
+    
     for (int i = 0; i < this->sizeK[0]; i++) {
       this->uk[i][0] = this->uTilder[i][0] - kxHat[i];
     }

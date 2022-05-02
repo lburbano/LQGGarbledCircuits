@@ -94,15 +94,20 @@ int main(int argc, char **argv) {
   cout << "Off:GarbleConstants" << "," << "Off:ComputeConstants" <<  endl;
   subsystem->inputData(  );
   // Computes controller matrices 
+
+  
+  
   auto init_offline = high_resolution_clock::now();
   subsystem->garbleControlConstants(  );
   auto offlineGarbling = high_resolution_clock::now();
 
+  
 
+  auto offlineConstants_init = high_resolution_clock::now();
   subsystem->computeReferenceConstants();
-  auto offline_compute_references = high_resolution_clock::now();
+  auto offlineConstants_end = high_resolution_clock::now();
 
-  auto TofflineConstants = std::chrono::duration_cast<std::chrono::microseconds>(offline_compute_references  - offlineGarbling).count();
+  auto TofflineConstants = std::chrono::duration_cast<std::chrono::microseconds>(offlineConstants_end  - offlineConstants_init).count();
   auto TofflineGarbling = std::chrono::duration_cast<std::chrono::microseconds>(offlineGarbling    - init_offline).count();
 
   cout << TofflineGarbling << "," << TofflineConstants << endl;
@@ -135,85 +140,42 @@ int main(int argc, char **argv) {
   }
   cout << endl;
   // Control loop
-  cout << "predictionTime" << ", ";
-  cout << "estimationTime" << ", ";
-  cout << "residuesTime" << ", ";
-  cout << "controlTime" << ", ";
-  cout << "cusumTime" << ", ";
-  cout << "revealAlarm" << ", ";    
-  cout << "Reveal U" << ", ";
-  cout << "New Labels";
-  cout << endl;
   
-  auto init = high_resolution_clock::now();
-  auto predictT_start = high_resolution_clock::now();
-  auto predictT = high_resolution_clock::now();
-  auto estimateT = high_resolution_clock::now();
-  auto residuesT = high_resolution_clock::now();
-  auto ukT_start = high_resolution_clock::now();
-  auto ukT = high_resolution_clock::now();
-  auto cusumT = high_resolution_clock::now();
-  auto newLabelsT = high_resolution_clock::now();
-  auto measure_state = high_resolution_clock::now();
-  auto end = high_resolution_clock::now();
-  float time_reveal_u = 0;
-  float time_labels = 0;
-
+  
+  
+  
+  auto init_computations = high_resolution_clock::now();
+  auto end_computations = high_resolution_clock::now();
+  int new_labels = 0;
+  int reveal_u = 0;
+  int computation_time = 0;
   for (k = 0; k < niter; k++) {
-    init = high_resolution_clock::now();
+    sleep(1);
+    computation_time = 0;
+    init_computations = high_resolution_clock::now();
+    new_labels = subsystem->computezk( k );
     if (k > 0){
-      predictT_start = high_resolution_clock::now();
       cloud->predict();
-      predictT = high_resolution_clock::now();
-
-
       cloud->computexHat(subsystem->zk);
-      estimateT = high_resolution_clock::now();
     }
-    ukT_start = high_resolution_clock::now();
     cloud->computeuk();
-    ukT = high_resolution_clock::now();
-
-
     cloud->computeResidues(subsystem->zk);
-    residuesT = high_resolution_clock::now();
-
     cloud->computeCusum();
-    cusumT = high_resolution_clock::now();
+    end_computations = high_resolution_clock::now();
 
-    time_reveal_u = subsystem->measureState(cloud->uk);
-    measure_state = high_resolution_clock::now();
+    reveal_u = subsystem->measureState(cloud->uk, k);
 
+    computation_time = std::chrono::duration_cast<std::chrono::microseconds>(end_computations  - init_computations).count();
 
-    time_labels = subsystem->computezk();
-    newLabelsT = high_resolution_clock::now();
-
+    init_computations = high_resolution_clock::now();
     cloud->reveal_alarm( PUBLIC );
-    end = high_resolution_clock::now();
+    end_computations = high_resolution_clock::now();
 
 
-    auto predictionTime = std::chrono::duration_cast<std::chrono::microseconds>(predictT  - predictT_start).count();
-    auto estimationTime = std::chrono::duration_cast<std::chrono::microseconds>(estimateT - predictT).count();
-    auto controlTime    = std::chrono::duration_cast<std::chrono::microseconds>(ukT       - ukT_start).count();
-    auto residuesTime   = std::chrono::duration_cast<std::chrono::microseconds>(residuesT - ukT).count();
-    auto cusumTime      = std::chrono::duration_cast<std::chrono::microseconds>(cusumT    - residuesT).count();
-    auto revealAlarm    = std::chrono::duration_cast<std::chrono::microseconds>(end   - newLabelsT).count();
-    
-    
-    cout << predictionTime << ",";
-    cout << estimationTime << ",";
-    cout << residuesTime << ",";
-    cout << controlTime << ",";
-    cout << cusumTime << ",";
-    cout << revealAlarm << ",";
-    cout << time_reveal_u << ",";
-    cout << time_labels;
-    cout << endl;
-    
-    if (print) 
-      print_rest( cloud, subsystem, parties[0], k+1);
-    
-    
+    computation_time = computation_time + std::chrono::duration_cast<std::chrono::microseconds>(end_computations  - init_computations).count();
+    computation_time = computation_time + reveal_u + new_labels;
+
+    cout << computation_time << endl;
   }
   cout << "Finished" << endl;
   

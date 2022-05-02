@@ -102,7 +102,7 @@ public:
   
 
   // Reveals the value of u[k] to the system
-  float measureState(fixedPoint **uk) {
+  float measureState(fixedPoint **uk, int k) {
     auto measure_init = high_resolution_clock::now();
     for (int i = 0; i < this->sizeur[0]; i++) 
       for (int j = 0; j < this->sizeur[1]; j++) 
@@ -115,7 +115,7 @@ public:
 
   // Creates z[k] to be used by the emp library.
   // Value is set to zero since the cloud party does not have the plaintext of z[k]
-  float computezk() {
+  float computezk(int k) {
     auto init = high_resolution_clock::now();
     setZero_GC( this->zk, this->sizezk, parties[0]);
     auto end = high_resolution_clock::now();
@@ -138,7 +138,6 @@ public:
     setData_GC( this->Nu, this->Nu_ne, this->sizeNu, parties[1]);
 
     // Initialize System's secret
-    setZero_GC( this->zk,    this->sizezk,    parties[0]);  
     setZero_GC( this->xk,    this->sizexk,    parties[0]);
     setZero_GC( this->xr,    this->sizexr,    parties[0]);
     setZero_GC( this->ur,    this->sizeur,    parties[0]);  
