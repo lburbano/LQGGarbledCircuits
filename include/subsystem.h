@@ -312,7 +312,7 @@ public:
     this->ur_ne    = init_size_file( data_folder + "ur.txt", this->sizeur);
     this->xr_ne    = init_size_file( data_folder + "xr.txt", this->sizexr);
 
-    // TODO: Easy fix for noise. Delete this before pushing
+    
     // To fix this, I have to find a way to produce multivariate random numbers...
     // [k][sensor_number]
     // this->process_noise = init_size_file( data_folder + "process_noise.txt", this->size_process_noise);

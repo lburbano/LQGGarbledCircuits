@@ -6,23 +6,24 @@
 #include "DummySubsystem.h"
 
 void print_init(Cloud *cloud, subSystem *subsystem, int party, int k) {
-  cout << "z" << k << ":  " << endl;
+  // cout << "z" << k << ":  " << endl;
   for (int i = 0; i < subsystem->sizexk[0]; i++) {
     for (int j = 0; j < subsystem->sizexk[1]; j++) {
-      cout << fixed << setprecision(5) << subsystem->zk[i][j].reveal<double>(party) << ", ";
+      // cout << fixed << setprecision(5) << subsystem->zk[i][j].reveal<double>(party) << ", ";
     }
-    cout << endl;
+    // cout << endl;
   }
-  cout << endl << endl;
+  // cout << endl << endl;
 
-  cout << "s" << k << ":  " << endl;
+  // cout << "s" << k << ":  " << endl;
   for (int i = 0; i < cloud->sizeCusum[0]; i++) {
     for (int j = 0; j < cloud->sizeCusum[1]; j++) {
-      cout << cloud->Cusum[i][j].reveal<double>(party) << ", ";
+      cloud->Cusum[i][j].reveal<double>(party);
+      // cout << cloud->Cusum[i][j].reveal<double>(party) << ", ";
     }
-    cout << endl;
+    // cout << endl;
   }
-  cout << endl << endl;
+  // cout << endl << endl;
 
 }
 
@@ -46,12 +47,14 @@ void print_rest( Cloud *cloud, subSystem *subsystem, int party, int k) {
   for (int i = 0; i < cloud->sizeyp[0]; i++) {
     if(cloud->HARD_CODE_ZEROES == 1){
       // cout << cloud->alarm_ne[i][0] << ", "; 
-      cout << cloud->alarm[i][0].reveal(PUBLIC) << ", "; 
+      cloud->alarm[i][0].reveal(PUBLIC);
+      // cout << cloud->alarm[i][0].reveal(PUBLIC) << ", "; 
     }else{
-     cout << cloud->alarm[i][0].reveal(PUBLIC) << ", "; 
+      cloud->alarm[i][0].reveal(PUBLIC);
+    //  cout << cloud->alarm[i][0].reveal(PUBLIC) << ", "; 
     }
   }
-  cout << endl;
+  // cout << endl;
 }
 
 int main(int argc, char **argv) {
@@ -108,19 +111,6 @@ int main(int argc, char **argv) {
 
   int k = 0;
  
-  if (print) {
-    for(int i=0; i<subsystem->sizezk[0]; i++){
-      cout << "y_" << i << ",";
-    }
-    for(int i=0; i<subsystem->sizeuk[0]; i++){
-      cout << "u_" << i << ",";
-    }
-    for(int i=0; i<subsystem->sizezk[0]; i++){
-      cout << "S_" << i << ",";
-    }
-    cout << endl;
-    // print_rest(cloud, subsystem, parties[0], k);
-  }
 
   // Control loop
 
